@@ -373,24 +373,30 @@ function startDemo() {
     let cursorBlinkOn = true;
     let blinkInterval = null;
 
-    // Start cursor blinking (only when idle)
+    // Push current text with cursor to display
+    function flushValue() {
+        if (!currentTypewriter) return;
+        const text = currentTypewriter.getDisplayedText();
+        const valueToSet = cursorVisible && cursorBlinkOn
+            ? text + getCursor(text)
+            : text;
+        if (demo.isMarkdown) {
+            currentMessageElement.innerHTML = parseMarkdown(valueToSet);
+        } else {
+            currentMessageElement.textContent = valueToSet;
+        }
+    }
+
+    // Start cursor blinking (only when idle, not during active animation)
     function startBlink() {
         if (blinkInterval) return;
         cursorBlinkOn = true;
         blinkInterval = setInterval(() => {
-            // Only blink when animation is idle
+            // Only toggle blink when animation is idle (not actively typing)
+            // During active animation, _animate() drives updates and cursor stays solid
             if (currentTypewriter && !currentTypewriter.isAnimating()) {
                 cursorBlinkOn = !cursorBlinkOn;
-                // Update display with blink
-                const text = currentTypewriter.getDisplayedText();
-                const valueToSet = cursorVisible && cursorBlinkOn
-                    ? text + getCursor(text)
-                    : text;
-                if (demo.isMarkdown) {
-                    currentMessageElement.innerHTML = parseMarkdown(valueToSet);
-                } else {
-                    currentMessageElement.textContent = valueToSet;
-                }
+                flushValue();
             }
         }, 500);
     }
@@ -406,11 +412,12 @@ function startDemo() {
     // Create typewriter service with full config
     currentTypewriter = new TypewriterService(
         (text) => {
-            // Update callback - called on each frame
+            // Update callback - called on each frame during active animation
             stats.frameCount++;
             stats.charCount = text.length;
             updateStats();
 
+            // During active animation, cursor is always solid (cursorBlinkOn stays true)
             // Append cursor inline to the text value (POC approach)
             const valueToSet = cursorVisible
                 ? text + getCursor(text)
@@ -436,6 +443,8 @@ function startDemo() {
                     startBlink();
                 } else {
                     stopBlink();
+                    // Send final update without cursor
+                    flushValue();
                 }
             }
         }
@@ -509,15 +518,26 @@ window.addEventListener('DOMContentLoaded', () => {
             if (!welcomeShown) {
                 setTimeout(() => {
                     addMessage('assistant',
-                        `<strong>Welcome! 👋</strong><br><br>
-                        This demo showcases streaming text animation with typewriter effects.<br><br>
-                        <strong>Try it out:</strong>
-                        <ul>
-                            <li>Select a demo from the dropdown</li>
-                            <li>Click "Start Demo" to see the animation</li>
-                            <li>Adjust settings with the ⚙️ icon</li>
-                        </ul>
-                        Ready when you are!`
+                        `Hi! I'm your **Agentforce Service Agent**. This demo showcases streaming text animation with adaptive typewriter effects.
+
+**How to use:**
+- Select a demo scenario from the left panel
+- Click **Start Demo** to see the animation
+- Adjust settings in collapsible sections:
+  - **Type Speed** - Characters per frame
+  - **Adaptive Speed Tiers** - Catch-up speeds
+  - **Queue Thresholds** - When to speed up
+  - **Timing** - Cursor and rush settings
+- Watch the **Speed Tier** indicator change colors as the animation adapts!
+
+**Key Features:**
+- Character-by-character reveal
+- Adaptive speed (catches up automatically)
+- Smart cursor (detects code blocks)
+- Live markdown parsing
+- Rush mode for smooth finishes
+
+Ready to see it in action?`
                     );
                     welcomeShown = true;
                 }, 300);
