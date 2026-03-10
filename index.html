@@ -16,192 +16,164 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             height: 100vh;
             overflow: hidden;
-        }
-
-        /* Main Wrapper */
-        .demo-wrapper {
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Settings Panel (Left) */
-        .settings-panel {
-            width: 350px;
-            background: white;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .panel-header {
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .panel-header h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .panel-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-
-        /* Settings Sections */
-        .settings-section {
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .settings-section:first-child {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
-        }
-
-        .settings-section h3 {
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .control-group {
-            margin-bottom: 16px;
-        }
-
-        .control-group label {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-
-        .control-group select,
-        .control-group input[type="range"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .control-group input[type="range"] {
-            padding: 0;
-        }
-
-        .range-value {
-            display: inline-block;
-            margin-left: 8px;
-            font-size: 12px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 8px;
-        }
-
-        button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        button.primary {
-            background: #667eea;
-            color: white;
-        }
-
-        button.secondary {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        button.danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Chat Wrapper (Right) */
-        .chat-wrapper {
-            flex: 1;
             position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
+        }
+
+        /* Info Banner */
+        .info-banner {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 600px;
+            z-index: 100;
+        }
+
+        .info-banner h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .info-banner p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        /* Floating Chat Button */
+        .chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            z-index: 1000;
         }
 
-        /* Chat Interface */
-        .chat-interface {
-            width: 90%;
-            max-width: 600px;
-            height: 90%;
+        .chat-fab:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .chat-fab:active {
+            transform: translateY(-2px);
+        }
+
+        .chat-fab.hidden {
+            display: none;
+        }
+
+        .fab-icon {
+            font-size: 24px;
+        }
+
+        /* Chat Window */
+        .chat-window {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 420px;
+            height: 650px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            display: flex;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: none;
             flex-direction: column;
             overflow: hidden;
             animation: chatSlideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .chat-window.open {
+            display: flex;
         }
 
         @keyframes chatSlideIn {
             from {
                 opacity: 0;
-                transform: scale(0.95);
+                transform: translateY(20px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: translateY(0) scale(1);
             }
         }
 
         /* Chat Header */
         .chat-header {
-            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            text-align: center;
         }
 
-        .chat-header h1 {
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 20px;
-            margin-bottom: 6px;
         }
 
-        .chat-header p {
-            font-size: 13px;
+        .chat-header-info h2 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .chat-header-info p {
+            font-size: 12px;
             opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         /* Messages Container */
@@ -243,10 +215,10 @@
         .user-message-bubble {
             background: #667eea;
             color: white;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 18px;
             border-bottom-right-radius: 4px;
-            max-width: 75%;
+            max-width: 80%;
             word-wrap: break-word;
             font-size: 14px;
             line-height: 1.5;
@@ -256,13 +228,13 @@
         .assistant-message-wrapper {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 8px;
             max-width: 85%;
         }
 
         .assistant-avatar {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: #667eea;
             display: flex;
@@ -270,20 +242,20 @@
             justify-content: center;
             flex-shrink: 0;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .assistant-message-bubble {
             background: white;
             color: #333;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 18px;
             border-bottom-left-radius: 4px;
             word-wrap: break-word;
             font-size: 14px;
             line-height: 1.5;
             flex: 1;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         /* Markdown styles */
@@ -294,18 +266,24 @@
             font-weight: 600;
         }
 
-        .assistant-message-bubble h1 { font-size: 1.5em; }
-        .assistant-message-bubble h2 { font-size: 1.3em; }
+        .assistant-message-bubble h1:first-child,
+        .assistant-message-bubble h2:first-child,
+        .assistant-message-bubble h3:first-child {
+            margin-top: 0;
+        }
+
+        .assistant-message-bubble h1 { font-size: 1.4em; }
+        .assistant-message-bubble h2 { font-size: 1.2em; }
         .assistant-message-bubble h3 { font-size: 1.1em; }
 
         .assistant-message-bubble ul,
         .assistant-message-bubble ol {
-            margin: 10px 0;
-            padding-left: 24px;
+            margin: 8px 0;
+            padding-left: 20px;
         }
 
         .assistant-message-bubble li {
-            margin: 6px 0;
+            margin: 4px 0;
         }
 
         .assistant-message-bubble code {
@@ -320,10 +298,10 @@
         .assistant-message-bubble pre {
             background: #2d2d2d;
             color: #f8f8f2;
-            padding: 14px;
+            padding: 12px;
             border-radius: 6px;
             overflow-x: auto;
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         .assistant-message-bubble pre code {
@@ -337,23 +315,24 @@
         }
 
         .assistant-message-bubble blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 16px;
-            margin: 12px 0;
+            border-left: 3px solid #667eea;
+            padding-left: 12px;
+            margin: 10px 0;
             color: #666;
             font-style: italic;
         }
 
         .assistant-message-bubble table {
             border-collapse: collapse;
-            margin: 12px 0;
+            margin: 10px 0;
             width: 100%;
+            font-size: 13px;
         }
 
         .assistant-message-bubble table th,
         .assistant-message-bubble table td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px 8px;
             text-align: left;
         }
 
@@ -378,20 +357,168 @@
             50%, 100% { opacity: 0; }
         }
 
-        /* Stats Footer */
-        .stats-footer {
-            padding: 12px 20px;
+        /* Chat Input Area */
+        .chat-input-area {
+            padding: 16px;
             background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .input-controls select {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f5f5f5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chat-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-btn.primary:hover:not(:disabled) {
+            background: #5568d3;
+        }
+
+        .chat-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .chat-btn.secondary:hover:not(:disabled) {
+            background: #d0d0d0;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 320px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-panel.open {
+            transform: translateX(0);
+        }
+
+        .settings-header {
+            padding: 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .settings-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .setting-group {
+            margin-bottom: 24px;
+        }
+
+        .setting-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .range-value {
+            display: block;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .settings-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #f5f5f5;
+        }
+
+        .settings-footer button {
+            width: 100%;
+            padding: 12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .settings-footer button:hover {
+            background: #dc2626;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            padding: 8px 16px;
+            background: #f9f9f9;
             border-top: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
         }
 
         .stat-item {
             display: flex;
-            align-items: center;
             gap: 4px;
         }
 
@@ -401,89 +528,127 @@
     </style>
 </head>
 <body>
-    <div class="demo-wrapper">
-        <!-- Settings Panel (Left) -->
-        <div class="settings-panel">
-            <div class="panel-header">
-                <h2>⚙️ Settings</h2>
+    <!-- Info Banner -->
+    <div class="info-banner">
+        <h1>🚀 Typewriter Effect Demo</h1>
+        <p>Click the chat button below to start the interactive demo</p>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-fab" id="chatFab">
+        <span class="fab-icon">💬</span>
+        <span>Ask Me Anything</span>
+    </button>
+
+    <!-- Chat Window -->
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-header-info">
+                    <h2>Assistant</h2>
+                    <p>Online</p>
+                </div>
             </div>
-            <div class="panel-content">
-                <!-- Demo Content -->
-                <div class="control-group">
-                    <label for="demoSelect">Demo Content</label>
-                    <select id="demoSelect">
-                        <option value="simple">Simple Text</option>
-                        <option value="markdown">Rich Markdown</option>
-                        <option value="code">Code Example</option>
-                        <option value="conversation">Conversation</option>
-                        <option value="long">Long Response</option>
-                    </select>
-                </div>
-
-                <!-- Animation Settings -->
-                <div class="settings-section">
-                    <h3>Animation Settings</h3>
-                    <div class="control-group">
-                        <label for="speedRange">
-                            Speed (chars/frame) <span class="range-value" id="speedValue">1</span>
-                        </label>
-                        <input type="range" id="speedRange" min="1" max="10" value="1" step="1">
-                    </div>
-
-                    <div class="control-group">
-                        <label for="delayRange">
-                            Frame Delay (ms) <span class="range-value" id="delayValue">40</span>
-                        </label>
-                        <input type="range" id="delayRange" min="16" max="100" value="40" step="4">
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="settings-section">
-                    <h3>Actions</h3>
-                    <button class="primary" id="startBtn">Start Demo</button>
-                    <button class="secondary" id="skipBtn" disabled>Skip Animation</button>
-                    <button class="danger" id="clearBtn">Clear Chat</button>
-                </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+                <button class="icon-btn" id="minimizeBtn" title="Minimize">−</button>
             </div>
         </div>
 
-        <!-- Chat Interface (Right) -->
-        <div class="chat-wrapper">
-            <div class="chat-interface">
-                <div class="chat-header">
-                    <h1>🚀 Typewriter Effect Demo</h1>
-                    <p>See streaming text animation in action</p>
-                </div>
+        <div class="messages-container" id="chatContainer">
+            <!-- Messages will appear here -->
+        </div>
 
-                <div class="messages-container" id="chatContainer">
-                    <!-- Messages will appear here -->
-                </div>
-
-                <div class="stats-footer">
-                    <div class="stat-item">
-                        <span class="stat-label">Frames:</span>
-                        <span id="frameCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Duration:</span>
-                        <span id="duration">0.0s</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Chars:</span>
-                        <span id="charCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Status:</span>
-                        <span id="status">Ready</span>
-                    </div>
-                </div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Frames:</span>
+                <span id="frameCount">0</span>
             </div>
+            <div class="stat-item">
+                <span class="stat-label">Duration:</span>
+                <span id="duration">0.0s</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Chars:</span>
+                <span id="charCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Status:</span>
+                <span id="status">Ready</span>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <div class="input-controls">
+                <select id="demoSelect">
+                    <option value="simple">Simple Text</option>
+                    <option value="markdown">Rich Markdown</option>
+                    <option value="code">Code Example</option>
+                    <option value="conversation">Conversation</option>
+                    <option value="long">Long Response</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="chat-btn primary" id="startBtn">Start Demo</button>
+                <button class="chat-btn secondary" id="skipBtn" disabled>Skip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h3>Settings</h3>
+            <button class="icon-btn" id="closeSettingsBtn">✕</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <label for="speedRange">Animation Speed (chars/frame)</label>
+                <input type="range" id="speedRange" min="1" max="10" value="1" step="1">
+                <span class="range-value" id="speedValue">1</span>
+            </div>
+
+            <div class="setting-group">
+                <label for="delayRange">Frame Delay (ms)</label>
+                <input type="range" id="delayRange" min="16" max="100" value="40" step="4">
+                <span class="range-value" id="delayValue">40</span>
+            </div>
+        </div>
+        <div class="settings-footer">
+            <button id="clearBtn">Clear Chat</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="typewriter.js"></script>
     <script src="demo.js"></script>
+    <script>
+        // Chat window controls
+        const chatFab = document.getElementById('chatFab');
+        const chatWindow = document.getElementById('chatWindow');
+        const minimizeBtn = document.getElementById('minimizeBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+
+        chatFab.addEventListener('click', () => {
+            chatFab.classList.add('hidden');
+            chatWindow.classList.add('open');
+        });
+
+        minimizeBtn.addEventListener('click', () => {
+            chatWindow.classList.remove('open');
+            chatFab.classList.remove('hidden');
+        });
+
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('open');
+        });
+
+        closeSettingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.remove('open');
+        });
+    </script>
 </body>
 </html>

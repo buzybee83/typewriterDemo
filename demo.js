@@ -199,21 +199,40 @@ function addMessage(role, initialContent = '') {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
 
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.className = 'message-bubble';
-    if (role === 'assistant') {
-        bubbleDiv.classList.add('streaming');
+    if (role === 'user') {
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'user-message-bubble';
+        bubbleDiv.textContent = initialContent;
+        messageDiv.appendChild(bubbleDiv);
+    } else {
+        // Assistant message with avatar
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'assistant-message-wrapper';
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'assistant-avatar';
+        avatarDiv.textContent = '🤖';
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'assistant-message-bubble';
+        if (initialContent) {
+            bubbleDiv.innerHTML = initialContent;
+        }
+
+        wrapperDiv.appendChild(avatarDiv);
+        wrapperDiv.appendChild(bubbleDiv);
+        messageDiv.appendChild(wrapperDiv);
+
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        return bubbleDiv;
     }
 
-    if (initialContent) {
-        bubbleDiv.innerHTML = initialContent;
-    }
-
-    messageDiv.appendChild(bubbleDiv);
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    return bubbleDiv;
+    return messageDiv.querySelector('.user-message-bubble') || messageDiv;
 }
 
 // Helper: Update stats display
@@ -233,14 +252,17 @@ function simulateStreaming(chunks, typewriter, isMarkdown) {
 
     function sendNextChunk() {
         if (chunkIndex >= chunks.length) {
-            // All chunks sent - let animation finish naturally
+            // All chunks sent - wait a brief moment then skip to end
             statusEl.textContent = 'Stream complete';
             setTimeout(() => {
-                typewriter.skipToEnd();
+                // Skip to end to immediately hide cursor and finish animation
+                if (typewriter && typewriter.hasPendingContent()) {
+                    typewriter.skipToEnd();
+                }
                 skipBtn.disabled = true;
                 startBtn.disabled = false;
                 statusEl.textContent = 'Ready';
-            }, 500);
+            }, 300);
             return;
         }
 
@@ -285,6 +307,9 @@ function startDemo() {
     const charsPerFrame = parseInt(speedRange.value);
     const frameDelayMs = parseInt(delayRange.value);
 
+    // Track cursor state
+    let showCursor = true;
+
     // Create typewriter service
     currentTypewriter = new TypewriterService(
         (text) => {
@@ -295,14 +320,19 @@ function startDemo() {
 
             // Update message bubble
             if (demo.isMarkdown) {
-                currentMessageElement.innerHTML = parseMarkdown(text) +
-                    '<span class="typewriter-cursor"></span>';
+                currentMessageElement.innerHTML = parseMarkdown(text);
+                // Add cursor if visible
+                if (showCursor) {
+                    currentMessageElement.innerHTML += '<span class="typewriter-cursor"></span>';
+                }
             } else {
                 currentMessageElement.textContent = text;
-                // Add cursor
-                const cursor = document.createElement('span');
-                cursor.className = 'typewriter-cursor';
-                currentMessageElement.appendChild(cursor);
+                // Add cursor if visible
+                if (showCursor) {
+                    const cursor = document.createElement('span');
+                    cursor.className = 'typewriter-cursor';
+                    currentMessageElement.appendChild(cursor);
+                }
             }
 
             // Auto-scroll
@@ -312,11 +342,14 @@ function startDemo() {
             isMarkdown: demo.isMarkdown,
             onCursorChange: (visible) => {
                 // Cursor visibility callback
+                showCursor = visible;
                 if (!visible && currentMessageElement) {
-                    // Remove cursor when hidden
-                    const cursor = currentMessageElement.querySelector('.typewriter-cursor');
-                    if (cursor) {
-                        cursor.remove();
+                    // Remove cursor when hidden - update content without cursor
+                    const text = currentTypewriter.getDisplayedText();
+                    if (demo.isMarkdown) {
+                        currentMessageElement.innerHTML = parseMarkdown(text);
+                    } else {
+                        currentMessageElement.textContent = text;
                     }
                 }
             }
@@ -375,18 +408,34 @@ function clearChat() {
     skipBtn.disabled = true;
 }
 
-// Initial welcome message
+// Initial welcome message - show when chat opens
+let welcomeShown = false;
+
+// Listen for chat window opening
+const originalChatFabClick = document.getElementById('chatFab')?.addEventListener;
 window.addEventListener('DOMContentLoaded', () => {
-    addMessage('assistant',
-        `<strong>Welcome to the Typewriter Effect Demo! 👋</strong><br><br>
-        This demo showcases a streaming text animation system that makes content feel more responsive.<br><br>
-        <strong>Features:</strong>
-        <ul>
-            <li>Character-by-character reveal</li>
-            <li>Adaptive speed (catches up when needed)</li>
-            <li>Blinking cursor during animation</li>
-            <li>Markdown support with live parsing</li>
-        </ul>
-        Select a demo type and click "Start Demo" to see it in action!`
-    );
+    const chatFab = document.getElementById('chatFab');
+    const chatWindow = document.getElementById('chatWindow');
+
+    // Override the click handler to add welcome message
+    if (chatFab) {
+        chatFab.addEventListener('click', () => {
+            if (!welcomeShown) {
+                setTimeout(() => {
+                    addMessage('assistant',
+                        `<strong>Welcome! 👋</strong><br><br>
+                        This demo showcases streaming text animation with typewriter effects.<br><br>
+                        <strong>Try it out:</strong>
+                        <ul>
+                            <li>Select a demo from the dropdown</li>
+                            <li>Click "Start Demo" to see the animation</li>
+                            <li>Adjust settings with the ⚙️ icon</li>
+                        </ul>
+                        Ready when you are!`
+                    );
+                    welcomeShown = true;
+                }, 300);
+            }
+        }, { once: true });
+    }
 });
