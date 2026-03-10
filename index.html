@@ -53,32 +53,98 @@
         }
 
         .settings-content {
-            padding: 24px;
+            padding: 20px;
         }
 
-        .setting-section {
-            margin-bottom: 32px;
+        /* Demo Selection */
+        .demo-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .setting-section h2 {
+        .demo-section h2 {
             font-size: 14px;
             font-weight: 600;
             color: #333;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
+            margin-bottom: 12px;
+        }
+
+        .demo-section select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9f9f9;
+        }
+
+        /* Collapsible Section */
+        .config-section {
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f9f9f9;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section-icon {
+            font-size: 12px;
+            color: #666;
+            transition: transform 0.2s;
+        }
+
+        .section-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: white;
+        }
+
+        .section-content.expanded {
+            max-height: 1000px;
+        }
+
+        .section-body {
+            padding: 16px;
         }
 
         .setting-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
         }
 
         .setting-group label {
             display: block;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 500;
             color: #666;
             margin-bottom: 8px;
         }
@@ -88,15 +154,6 @@
             color: #999;
             margin-top: 4px;
             font-style: italic;
-        }
-
-        .setting-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #f9f9f9;
         }
 
         .setting-group input[type="range"] {
@@ -123,11 +180,49 @@
             color: #999;
         }
 
+        /* Stats Section */
+        .stats-section {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
         .action-buttons {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-top: 24px;
         }
 
         .btn {
@@ -254,8 +349,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
             border-radius: 16px 16px 0 0;
         }
 
@@ -266,30 +361,38 @@
         }
 
         .chat-avatar {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: #667eea;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 18px;
+            color: white;
         }
 
         .chat-header-info h2 {
-            font-size: 16px;
+            font-size: 15px;
+            color: #333;
+            font-weight: 600;
             margin-bottom: 2px;
         }
 
         .chat-header-info p {
-            font-size: 12px;
-            opacity: 0.9;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
         }
 
         .icon-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: transparent;
             border: none;
-            color: white;
+            color: #666;
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -302,7 +405,7 @@
         }
 
         .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #f5f5f5;
         }
 
         /* Messages Container */
@@ -468,87 +571,50 @@
             font-weight: 600;
         }
 
-        /* Typewriter Cursor */
-        .typewriter-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em;
-            background: #667eea;
-            margin-left: 2px;
-            vertical-align: text-bottom;
-            animation: blink 0.8s infinite;
-        }
-
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            padding: 10px 20px;
-            background: #fafafa;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #666;
-        }
-
-        .stat-item {
-            display: flex;
-            gap: 4px;
-        }
-
-        .stat-label {
-            font-weight: 600;
-        }
-
-        /* Input Area */
-        .chat-input-area {
+        /* Chat Footer (outside messages) */
+        .chat-footer {
             padding: 16px 20px;
             background: white;
             border-top: 1px solid #e0e0e0;
             border-radius: 0 0 16px 16px;
         }
 
-        .chat-actions {
+        .chat-input-wrapper {
             display: flex;
+            align-items: center;
             gap: 8px;
+            padding: 10px 16px;
+            background: #f5f5f5;
+            border-radius: 24px;
+            margin-bottom: 8px;
         }
 
-        .chat-btn {
+        .chat-input {
             flex: 1;
-            padding: 12px 16px;
             border: none;
-            border-radius: 8px;
+            background: transparent;
+            outline: none;
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .chat-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .chat-btn.primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .chat-btn.primary:hover:not(:disabled) {
-            background: #5568d3;
-        }
-
-        .chat-btn.secondary {
-            background: #e0e0e0;
             color: #333;
         }
 
-        .chat-btn.secondary:hover:not(:disabled) {
-            background: #d0d0d0;
+        .chat-input::placeholder {
+            color: #999;
+        }
+
+        .send-btn {
+            background: transparent;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 4px;
+        }
+
+        .footer-text {
+            font-size: 10px;
+            color: #999;
+            text-align: center;
         }
     </style>
 </head>
@@ -563,148 +629,186 @@
 
             <div class="settings-content">
                 <!-- Demo Selection -->
-                <div class="setting-section">
+                <div class="demo-section">
                     <h2>Demo Content</h2>
-                    <div class="setting-group">
-                        <label for="demoSelect">Select Scenario</label>
-                        <select id="demoSelect">
-                            <option value="simple">Simple Text</option>
-                            <option value="markdown">Rich Markdown</option>
-                            <option value="code">Code Example</option>
-                            <option value="conversation">Conversation</option>
-                            <option value="long">Long Response</option>
-                        </select>
-                        <div class="help-text">Choose a demo scenario to test</div>
-                    </div>
+                    <select id="demoSelect">
+                        <option value="simple">Simple Text</option>
+                        <option value="markdown">Rich Markdown</option>
+                        <option value="code">Code Example</option>
+                        <option value="conversation">Conversation</option>
+                        <option value="long">Long Response</option>
+                    </select>
                 </div>
 
-                <!-- Basic Animation Settings -->
-                <div class="setting-section">
-                    <h2>Basic Animation</h2>
-
-                    <div class="setting-group">
-                        <label for="charsPerFrame">Characters Per Frame</label>
-                        <input type="range" id="charsPerFrame" min="1" max="10" value="1" step="1">
-                        <div class="range-display">
-                            <span class="range-label">Normal speed for plain text</span>
-                            <span class="range-value" id="charsPerFrameValue">1</span>
-                        </div>
+                <!-- Type Speed Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('typeSpeed')">
+                        <span class="section-title">Type Speed</span>
+                        <span class="section-icon" id="typeSpeed-icon">▼</span>
                     </div>
+                    <div class="section-content" id="typeSpeed-content">
+                        <div class="section-body">
+                            <div class="setting-group">
+                                <label for="charsPerFrame">Characters Per Frame</label>
+                                <input type="range" id="charsPerFrame" min="1" max="10" value="1" step="1">
+                                <div class="range-display">
+                                    <span class="range-label">Plain text speed</span>
+                                    <span class="range-value" id="charsPerFrameValue">1</span>
+                                </div>
+                            </div>
 
-                    <div class="setting-group">
-                        <label for="charsPerFrameMarkdown">Markdown Characters Per Frame</label>
-                        <input type="range" id="charsPerFrameMarkdown" min="1" max="10" value="1" step="1">
-                        <div class="range-display">
-                            <span class="range-label">Speed for markdown content</span>
-                            <span class="range-value" id="charsPerFrameMarkdownValue">1</span>
-                        </div>
-                    </div>
+                            <div class="setting-group">
+                                <label for="charsPerFrameMarkdown">Markdown Speed</label>
+                                <input type="range" id="charsPerFrameMarkdown" min="1" max="10" value="1" step="1">
+                                <div class="range-display">
+                                    <span class="range-label">Markdown content speed</span>
+                                    <span class="range-value" id="charsPerFrameMarkdownValue">1</span>
+                                </div>
+                            </div>
 
-                    <div class="setting-group">
-                        <label for="frameDelayMs">Frame Delay (ms)</label>
-                        <input type="range" id="frameDelayMs" min="10" max="100" value="35" step="5">
-                        <div class="range-display">
-                            <span class="range-label">Time between frames</span>
-                            <span class="range-value" id="frameDelayMsValue">35</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Adaptive Speed Settings -->
-                <div class="setting-section">
-                    <h2>Adaptive Speed</h2>
-
-                    <div class="setting-group">
-                        <label for="charsPerFrameMedium">Medium Speed (chars/frame)</label>
-                        <input type="range" id="charsPerFrameMedium" min="1" max="10" value="3" step="1">
-                        <div class="range-display">
-                            <span class="range-label">When queue > medium threshold</span>
-                            <span class="range-value" id="charsPerFrameMediumValue">3</span>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="charsPerFrameHigh">High Speed (chars/frame)</label>
-                        <input type="range" id="charsPerFrameHigh" min="1" max="15" value="5" step="1">
-                        <div class="range-display">
-                            <span class="range-label">When queue > high threshold</span>
-                            <span class="range-value" id="charsPerFrameHighValue">5</span>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="charsPerFrameCatchingUp">Critical Speed (chars/frame)</label>
-                        <input type="range" id="charsPerFrameCatchingUp" min="1" max="20" value="10" step="1">
-                        <div class="range-display">
-                            <span class="range-label">When queue > critical threshold</span>
-                            <span class="range-value" id="charsPerFrameCatchingUpValue">10</span>
+                            <div class="setting-group">
+                                <label for="frameDelayMs">Frame Delay (ms)</label>
+                                <input type="range" id="frameDelayMs" min="10" max="100" value="35" step="5">
+                                <div class="range-display">
+                                    <span class="range-label">Time between frames</span>
+                                    <span class="range-value" id="frameDelayMsValue">35</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Queue Thresholds -->
-                <div class="setting-section">
-                    <h2>Queue Thresholds</h2>
-
-                    <div class="setting-group">
-                        <label for="queueThresholdMedium">Medium Threshold (chars)</label>
-                        <input type="range" id="queueThresholdMedium" min="10" max="100" value="45" step="5">
-                        <div class="range-display">
-                            <span class="range-label">Start speeding up</span>
-                            <span class="range-value" id="queueThresholdMediumValue">45</span>
-                        </div>
+                <!-- Adaptive Speed Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('adaptiveSpeed')">
+                        <span class="section-title">Adaptive Speed Tiers</span>
+                        <span class="section-icon" id="adaptiveSpeed-icon">▼</span>
                     </div>
+                    <div class="section-content" id="adaptiveSpeed-content">
+                        <div class="section-body">
+                            <div class="setting-group">
+                                <label for="charsPerFrameMedium">Medium Tier</label>
+                                <input type="range" id="charsPerFrameMedium" min="1" max="10" value="3" step="1">
+                                <div class="range-display">
+                                    <span class="range-label">When queue > medium threshold</span>
+                                    <span class="range-value" id="charsPerFrameMediumValue">3</span>
+                                </div>
+                            </div>
 
-                    <div class="setting-group">
-                        <label for="queueThresholdHigh">High Threshold (chars)</label>
-                        <input type="range" id="queueThresholdHigh" min="20" max="200" value="80" step="10">
-                        <div class="range-display">
-                            <span class="range-label">Speed up more</span>
-                            <span class="range-value" id="queueThresholdHighValue">80</span>
-                        </div>
-                    </div>
+                            <div class="setting-group">
+                                <label for="charsPerFrameHigh">High Tier</label>
+                                <input type="range" id="charsPerFrameHigh" min="1" max="15" value="5" step="1">
+                                <div class="range-display">
+                                    <span class="range-label">When queue > high threshold</span>
+                                    <span class="range-value" id="charsPerFrameHighValue">5</span>
+                                </div>
+                            </div>
 
-                    <div class="setting-group">
-                        <label for="queueThresholdCritical">Critical Threshold (chars)</label>
-                        <input type="range" id="queueThresholdCritical" min="50" max="300" value="120" step="10">
-                        <div class="range-display">
-                            <span class="range-label">Maximum speed</span>
-                            <span class="range-value" id="queueThresholdCriticalValue">120</span>
+                            <div class="setting-group">
+                                <label for="charsPerFrameCatchingUp">Critical Tier</label>
+                                <input type="range" id="charsPerFrameCatchingUp" min="1" max="20" value="10" step="1">
+                                <div class="range-display">
+                                    <span class="range-label">When queue > critical threshold</span>
+                                    <span class="range-value" id="charsPerFrameCatchingUpValue">10</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Timing Settings -->
-                <div class="setting-section">
-                    <h2>Timing</h2>
-
-                    <div class="setting-group">
-                        <label for="maxAnimationTimeMs">Max Animation Time (ms)</label>
-                        <input type="range" id="maxAnimationTimeMs" min="5000" max="30000" value="15000" step="1000">
-                        <div class="range-display">
-                            <span class="range-label">Safety timeout</span>
-                            <span class="range-value" id="maxAnimationTimeMsValue">15000</span>
-                        </div>
-                        <div class="help-text">Auto skip if animation exceeds this duration</div>
+                <!-- Queue Thresholds Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('thresholds')">
+                        <span class="section-title">Queue Thresholds</span>
+                        <span class="section-icon" id="thresholds-icon">▼</span>
                     </div>
+                    <div class="section-content" id="thresholds-content">
+                        <div class="section-body">
+                            <div class="setting-group">
+                                <label for="queueThresholdMedium">Medium Threshold (chars)</label>
+                                <input type="range" id="queueThresholdMedium" min="10" max="100" value="45" step="5">
+                                <div class="range-display">
+                                    <span class="range-label">Start speeding up</span>
+                                    <span class="range-value" id="queueThresholdMediumValue">45</span>
+                                </div>
+                            </div>
 
-                    <div class="setting-group">
-                        <label for="idleCursorTimeoutMs">Idle Cursor Timeout (ms)</label>
-                        <input type="range" id="idleCursorTimeoutMs" min="500" max="5000" value="1500" step="100">
-                        <div class="range-display">
-                            <span class="range-label">Cursor hide delay</span>
-                            <span class="range-value" id="idleCursorTimeoutMsValue">1500</span>
+                            <div class="setting-group">
+                                <label for="queueThresholdHigh">High Threshold (chars)</label>
+                                <input type="range" id="queueThresholdHigh" min="20" max="200" value="80" step="10">
+                                <div class="range-display">
+                                    <span class="range-label">Speed up more</span>
+                                    <span class="range-value" id="queueThresholdHighValue">80</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-group">
+                                <label for="queueThresholdCritical">Critical Threshold (chars)</label>
+                                <input type="range" id="queueThresholdCritical" min="50" max="300" value="120" step="10">
+                                <div class="range-display">
+                                    <span class="range-label">Maximum speed</span>
+                                    <span class="range-value" id="queueThresholdCriticalValue">120</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="help-text">How long cursor stays visible after animation</div>
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="setting-section">
-                    <h2>Actions</h2>
+                <!-- Timing Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('timing')">
+                        <span class="section-title">Timing</span>
+                        <span class="section-icon" id="timing-icon">▼</span>
+                    </div>
+                    <div class="section-content" id="timing-content">
+                        <div class="section-body">
+                            <div class="setting-group">
+                                <label for="maxAnimationTimeMs">Max Animation Time (ms)</label>
+                                <input type="range" id="maxAnimationTimeMs" min="5000" max="30000" value="15000" step="1000">
+                                <div class="range-display">
+                                    <span class="range-label">Safety timeout</span>
+                                    <span class="range-value" id="maxAnimationTimeMsValue">15000</span>
+                                </div>
+                                <div class="help-text">Auto skip if exceeded</div>
+                            </div>
+
+                            <div class="setting-group">
+                                <label for="idleCursorTimeoutMs">Idle Cursor Timeout (ms)</label>
+                                <input type="range" id="idleCursorTimeoutMs" min="500" max="5000" value="1500" step="100">
+                                <div class="range-display">
+                                    <span class="range-label">Cursor hide delay</span>
+                                    <span class="range-value" id="idleCursorTimeoutMsValue">1500</span>
+                                </div>
+                                <div class="help-text">After animation ends</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">Frames</div>
+                            <div class="stat-value" id="frameCount">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Duration</div>
+                            <div class="stat-value" id="duration">0.0s</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Chars</div>
+                            <div class="stat-value" id="charCount">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Status</div>
+                            <div class="stat-value" id="status">Ready</div>
+                        </div>
+                    </div>
+
                     <div class="action-buttons">
                         <button class="btn btn-primary" id="startBtn">Start Demo</button>
-                        <button class="btn btn-secondary" id="skipBtn" disabled>Skip Animation</button>
+                        <button class="btn btn-secondary" id="skipBtn" disabled>Skip</button>
                         <button class="btn btn-danger" id="clearBtn">Clear Chat</button>
                     </div>
                 </div>
@@ -725,41 +829,26 @@
                     <div class="chat-header-left">
                         <div class="chat-avatar">🤖</div>
                         <div class="chat-header-info">
-                            <h2>AI Assistant</h2>
-                            <p>Online</p>
+                            <h2>Agentforce Service Agent</h2>
+                            <p>Agentforce Service Agent joined<br>Just now</p>
                         </div>
                     </div>
-                    <button class="icon-btn" id="minimizeBtn" title="Minimize">−</button>
+                    <div class="header-actions">
+                        <button class="icon-btn" title="Menu">⋮</button>
+                        <button class="icon-btn" id="minimizeBtn" title="Minimize">▼</button>
+                    </div>
                 </div>
 
                 <div class="messages-container" id="chatContainer">
                     <!-- Messages will appear here -->
                 </div>
 
-                <div class="stats-bar">
-                    <div class="stat-item">
-                        <span class="stat-label">Frames:</span>
-                        <span id="frameCount">0</span>
+                <div class="chat-footer">
+                    <div class="chat-input-wrapper">
+                        <input type="text" class="chat-input" placeholder="Type your message..." readonly>
+                        <button class="send-btn">↑</button>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Duration:</span>
-                        <span id="duration">0.0s</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Chars:</span>
-                        <span id="charCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Status:</span>
-                        <span id="status">Ready</span>
-                    </div>
-                </div>
-
-                <div class="chat-input-area">
-                    <div class="chat-actions">
-                        <button class="chat-btn primary" id="startBtnChat">Start Demo</button>
-                        <button class="chat-btn secondary" id="skipBtnChat" disabled>Skip</button>
-                    </div>
+                    <div class="footer-text">Powered by Agentforce from Salesforce</div>
                 </div>
             </div>
         </div>
@@ -768,8 +857,20 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="typewriter.js"></script>
     <script>
-        // Chat window controls
+        // Toggle collapsible sections
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId + '-content');
+            const icon = document.getElementById(sectionId + '-icon');
+
+            content.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+
+        // Open first section by default
         window.addEventListener('DOMContentLoaded', () => {
+            toggleSection('typeSpeed');
+
+            // Chat window controls
             const chatFab = document.getElementById('chatFab');
             const chatWindow = document.getElementById('chatWindow');
             const minimizeBtn = document.getElementById('minimizeBtn');
@@ -783,15 +884,6 @@
                 chatWindow.classList.remove('open');
                 chatFab.classList.remove('hidden');
             });
-
-            // Sync chat buttons with main buttons
-            const startBtnMain = document.getElementById('startBtn');
-            const skipBtnMain = document.getElementById('skipBtn');
-            const startBtnChat = document.getElementById('startBtnChat');
-            const skipBtnChat = document.getElementById('skipBtnChat');
-
-            startBtnChat.addEventListener('click', () => startBtnMain.click());
-            skipBtnChat.addEventListener('click', () => skipBtnMain.click());
 
             // Update range displays
             const ranges = [
