@@ -767,47 +767,49 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="typewriter.js"></script>
-    <script src="demo.js"></script>
     <script>
         // Chat window controls
-        const chatFab = document.getElementById('chatFab');
-        const chatWindow = document.getElementById('chatWindow');
-        const minimizeBtn = document.getElementById('minimizeBtn');
+        window.addEventListener('DOMContentLoaded', () => {
+            const chatFab = document.getElementById('chatFab');
+            const chatWindow = document.getElementById('chatWindow');
+            const minimizeBtn = document.getElementById('minimizeBtn');
 
-        chatFab.addEventListener('click', () => {
-            chatFab.classList.add('hidden');
-            chatWindow.classList.add('open');
-        });
+            chatFab.addEventListener('click', () => {
+                chatFab.classList.add('hidden');
+                chatWindow.classList.add('open');
+            });
 
-        minimizeBtn.addEventListener('click', () => {
-            chatWindow.classList.remove('open');
-            chatFab.classList.remove('hidden');
-        });
+            minimizeBtn.addEventListener('click', () => {
+                chatWindow.classList.remove('open');
+                chatFab.classList.remove('hidden');
+            });
 
-        // Sync chat buttons with main buttons
-        const startBtn = document.getElementById('startBtn');
-        const skipBtn = document.getElementById('skipBtn');
-        const startBtnChat = document.getElementById('startBtnChat');
-        const skipBtnChat = document.getElementById('skipBtnChat');
+            // Sync chat buttons with main buttons
+            const startBtnMain = document.getElementById('startBtn');
+            const skipBtnMain = document.getElementById('skipBtn');
+            const startBtnChat = document.getElementById('startBtnChat');
+            const skipBtnChat = document.getElementById('skipBtnChat');
 
-        startBtnChat.addEventListener('click', () => startBtn.click());
-        skipBtnChat.addEventListener('click', () => skipBtn.click());
+            startBtnChat.addEventListener('click', () => startBtnMain.click());
+            skipBtnChat.addEventListener('click', () => skipBtnMain.click());
 
-        // Update range displays
-        const ranges = [
-            'charsPerFrame', 'charsPerFrameMarkdown', 'frameDelayMs',
-            'charsPerFrameMedium', 'charsPerFrameHigh', 'charsPerFrameCatchingUp',
-            'queueThresholdMedium', 'queueThresholdHigh', 'queueThresholdCritical',
-            'maxAnimationTimeMs', 'idleCursorTimeoutMs'
-        ];
+            // Update range displays
+            const ranges = [
+                'charsPerFrame', 'charsPerFrameMarkdown', 'frameDelayMs',
+                'charsPerFrameMedium', 'charsPerFrameHigh', 'charsPerFrameCatchingUp',
+                'queueThresholdMedium', 'queueThresholdHigh', 'queueThresholdCritical',
+                'maxAnimationTimeMs', 'idleCursorTimeoutMs'
+            ];
 
-        ranges.forEach(id => {
-            const input = document.getElementById(id);
-            const display = document.getElementById(id + 'Value');
-            input.addEventListener('input', () => {
-                display.textContent = input.value;
+            ranges.forEach(id => {
+                const input = document.getElementById(id);
+                const display = document.getElementById(id + 'Value');
+                input.addEventListener('input', () => {
+                    display.textContent = input.value;
+                });
             });
         });
     </script>
+    <script src="demo.js"></script>
 </body>
 </html>
