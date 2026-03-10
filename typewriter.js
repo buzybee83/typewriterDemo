@@ -47,24 +47,25 @@ class TypewriterService {
     /** @type {number} Rush mode chars per frame */
     _rushCharsPerFrame = 0;
 
-    /** How long (ms) to wait after queue empties before hiding cursor */
-    static IDLE_CURSOR_TIMEOUT_MS = 1500;
+    /** @type {string|undefined} Last speed tier for logging */
+    _lastSpeedTier = undefined;
 
-    // Configuration
+    /** @type {Object} Configuration */
+    _config = {};
+
+    // Default configuration
     static CONFIG = {
-        // Plain text: chars per frame at normal speed
-        CHARS_PER_FRAME_TEXT: 1,
-        // Markdown: higher because each frame triggers a full re-parse + sanitize
-        CHARS_PER_FRAME_MARKDOWN: 1,
-        // Catching up when queue builds up
-        CHARS_PER_FRAME_CATCHING_UP: 5,
-        // Queue thresholds for adaptive speed (lower = catches up sooner)
-        QUEUE_THRESHOLD_MEDIUM: 45,
-        QUEUE_THRESHOLD_HIGH: 80,
-        QUEUE_THRESHOLD_CRITICAL: 120,
-        MAX_ANIMATION_TIME_MS: 15000, // Safety timeout
-        // Delay between frames in ms (>0 = use setTimeout for visible typing)
-        FRAME_DELAY_MS: 40
+        charsPerFrame: 1,
+        charsPerFrameMarkdown: 1,
+        charsPerFrameMedium: 3,
+        charsPerFrameHigh: 5,
+        charsPerFrameCatchingUp: 10,
+        queueThresholdMedium: 45,
+        queueThresholdHigh: 80,
+        queueThresholdCritical: 120,
+        maxAnimationTimeMs: 15000,
+        frameDelayMs: 35,
+        idleCursorTimeoutMs: 1500
     };
 
     /**
@@ -73,11 +74,13 @@ class TypewriterService {
      * @param {Object} options - Configuration options
      * @param {boolean} options.isMarkdown - Whether content is markdown (affects animation speed)
      * @param {Function} options.onCursorChange - Callback for cursor visibility: (visible: boolean) => void
+     * @param {Object} options.config - Partial config overrides
      */
     constructor(onUpdate, options = {}) {
         this._onUpdate = onUpdate;
         this._isMarkdown = options.isMarkdown || false;
         this._onCursorChange = options.onCursorChange || null;
+        this._config = { ...TypewriterService.CONFIG, ...options.config };
     }
 
     /**
@@ -101,13 +104,16 @@ class TypewriterService {
     }
 
     /**
-     * Add a delta chunk to the animation queue
-     * Called when a new chunk arrives from the stream
-     * @param {string} deltaText - The new text chunk to animate
+     * Add a text chunk to the animation queue.
+     * This is called each time a streaming delta arrives from the server.
+     * @param {string} deltaText - The new text to add
      */
     addChunk(deltaText) {
-        if (this._isDestroyed || !deltaText) return;
+        if (this._isDestroyed || !deltaText) {
+            return;
+        }
 
+        const wasAnimating = this._animationFrameId !== null;
         this._queue.push(deltaText);
 
         // Cancel idle timer — new content arrived
@@ -122,16 +128,19 @@ class TypewriterService {
     }
 
     /**
-     * Main animation loop - reveals characters from the queue
-     * Uses requestAnimationFrame for smooth 60fps animation
+     * Main animation loop using requestAnimationFrame.
+     * Reveals characters progressively and calls the update callback.
      * @private
      */
     _animate() {
-        if (this._isDestroyed) return;
+        if (this._isDestroyed) {
+            return;
+        }
 
         // Safety timeout - if animation runs too long, skip to end
-        if (Date.now() - this._startTime > TypewriterService.CONFIG.MAX_ANIMATION_TIME_MS) {
-            console.warn('TypewriterService: Animation timeout, skipping to end');
+        const elapsed = Date.now() - this._startTime;
+        if (elapsed > this._config.maxAnimationTimeMs) {
+            console.warn('TypewriterService: Animation exceeded max time, skipping to end');
             this.skipToEnd();
             return;
         }
@@ -154,7 +163,10 @@ class TypewriterService {
         const charsToAdd = this._getCharsPerFrame();
 
         // Extract characters to add
-        const endIndex = Math.min(this._charIndex + charsToAdd, this._currentChunk.length);
+        const endIndex = Math.min(
+            this._charIndex + charsToAdd,
+            this._currentChunk.length
+        );
         const newChars = this._currentChunk.slice(this._charIndex, endIndex);
 
         // Update state
@@ -163,26 +175,27 @@ class TypewriterService {
 
         // Notify the component
         try {
-            this._onUpdate(this._displayedText);
+            if (this._onUpdate) {
+                this._onUpdate(this._displayedText);
+            }
         } catch (e) {
             console.error('TypewriterService: Error in onUpdate callback', e);
-            // Continue animation despite error
         }
 
         // Schedule next frame — rush mode always uses rAF for smooth fast finish
-        const { FRAME_DELAY_MS } = TypewriterService.CONFIG;
-        if (!this._rushMode && FRAME_DELAY_MS > 0) {
-            this._animationFrameId = setTimeout(() => this._animate(), FRAME_DELAY_MS);
+        const { frameDelayMs } = this._config;
+        if (!this._rushMode && frameDelayMs > 0) {
+            this._animationFrameId = setTimeout(() => this._animate(), frameDelayMs);
         } else {
             this._animationFrameId = requestAnimationFrame(() => this._animate());
         }
     }
 
     /**
-     * Calculate characters to reveal per frame based on queue size
-     * Adaptive speed: increases when animation falls behind streaming
+     * Calculate how many characters to add this frame based on queue size.
+     * Uses adaptive speed: more characters when queue is large (catching up).
+     * @returns {number} Number of characters to add this frame
      * @private
-     * @returns {number} Number of characters to reveal this frame
      */
     _getCharsPerFrame() {
         // Rush mode overrides normal speed calculation
@@ -190,38 +203,51 @@ class TypewriterService {
             return this._rushCharsPerFrame;
         }
 
-        const { CONFIG } = TypewriterService;
+        const cfg = this._config;
 
         // Calculate total pending characters (how far behind we are)
-        const queuedChars = this._queue.reduce((sum, chunk) => sum + chunk.length, 0);
+        const queuedChars = this._queue.reduce(
+            (sum, chunk) => sum + chunk.length,
+            0
+        );
         const remainingInCurrent = this._currentChunk.length - this._charIndex;
         const totalPending = queuedChars + remainingInCurrent;
 
         // Adaptive speed based on how far behind animation is
-        if (totalPending > CONFIG.QUEUE_THRESHOLD_CRITICAL) {
-            return CONFIG.CHARS_PER_FRAME_CATCHING_UP;
-        }
-        if (totalPending > CONFIG.QUEUE_THRESHOLD_HIGH) {
-            return this._isMarkdown ? 8 : 4;
-        }
-        if (totalPending > CONFIG.QUEUE_THRESHOLD_MEDIUM) {
-            return this._isMarkdown ? 6 : 3;
+        let charsPerFrame;
+        let speedTier;
+        if (totalPending > cfg.queueThresholdCritical) {
+            charsPerFrame = cfg.charsPerFrameCatchingUp;
+            speedTier = 'critical';
+        } else if (totalPending > cfg.queueThresholdHigh) {
+            charsPerFrame = cfg.charsPerFrameHigh;
+            speedTier = 'high';
+        } else if (totalPending > cfg.queueThresholdMedium) {
+            charsPerFrame = cfg.charsPerFrameMedium;
+            speedTier = 'medium';
+        } else {
+            charsPerFrame = this._isMarkdown
+                ? cfg.charsPerFrameMarkdown
+                : cfg.charsPerFrame;
+            speedTier = 'normal';
         }
 
-        // Base speed — markdown uses higher rate to reduce expensive re-parses
-        return this._isMarkdown
-            ? CONFIG.CHARS_PER_FRAME_MARKDOWN
-            : CONFIG.CHARS_PER_FRAME_TEXT;
+        // Log only on speed tier changes to reduce noise
+        if (this._lastSpeedTier !== speedTier) {
+            this._lastSpeedTier = speedTier;
+        }
+
+        return charsPerFrame;
     }
 
     /**
-     * Cancel any pending animation (works for both setTimeout and requestAnimationFrame)
+     * Cancel ongoing animation frame.
      * @private
      */
     _cancelAnimation() {
         if (this._animationFrameId) {
-            const { FRAME_DELAY_MS } = TypewriterService.CONFIG;
-            if (FRAME_DELAY_MS > 0) {
+            const { frameDelayMs } = this._config;
+            if (frameDelayMs > 0) {
                 clearTimeout(this._animationFrameId);
             } else {
                 cancelAnimationFrame(this._animationFrameId);
@@ -231,8 +257,7 @@ class TypewriterService {
     }
 
     /**
-     * Start an idle timer that hides the cursor if no new chunk arrives.
-     * Called when the animation loop pauses (queue empty).
+     * Start idle timer to hide cursor after a delay if no new chunks arrive.
      * @private
      */
     _startIdleTimer() {
@@ -244,16 +269,18 @@ class TypewriterService {
                 this._setCursorVisible(false);
                 // Send final update without cursor
                 try {
-                    this._onUpdate(this._displayedText);
+                    if (this._onUpdate) {
+                        this._onUpdate(this._displayedText);
+                    }
                 } catch (e) {
-                    console.error('TypewriterService: Error in idle onUpdate', e);
+                    console.error('TypewriterService: Error in onUpdate callback during idle', e);
                 }
             }
-        }, TypewriterService.IDLE_CURSOR_TIMEOUT_MS);
+        }, this._config.idleCursorTimeoutMs);
     }
 
     /**
-     * Cancel the idle timer (new chunk arrived or service is being cleaned up).
+     * Cancel idle timer.
      * @private
      */
     _cancelIdleTimer() {
@@ -264,12 +291,13 @@ class TypewriterService {
     }
 
     /**
-     * Speed up the animation to finish all remaining content within a time budget.
-     * Unlike skipToEnd(), this keeps animating visually — just faster.
-     * @param {number} maxMs - Maximum milliseconds to finish (default 5000)
+     * Speed up animation to finish within the time budget (keeps animating, just faster).
+     * @param {number} maxMs - Maximum time in ms to finish animation (default: 5000)
      */
     rushToEnd(maxMs = 5000) {
-        if (this._isDestroyed) return;
+        if (this._isDestroyed) {
+            return;
+        }
 
         // Calculate total remaining characters
         const remainingInCurrent = this._currentChunk.length - this._charIndex;
@@ -290,7 +318,7 @@ class TypewriterService {
         // Override the per-frame calculation for the remainder of this animation
         this._rushCharsPerFrame = charsPerFrame;
 
-        // Switch to requestAnimationFrame for smooth rush regardless of current FRAME_DELAY_MS
+        // Switch to requestAnimationFrame for smooth rush regardless of current frameDelayMs
         this._rushMode = true;
 
         // If animation was paused (idle), restart it
@@ -301,10 +329,13 @@ class TypewriterService {
     }
 
     /**
-     * Skip animation and show all remaining content immediately
+     * Immediately display all remaining content without animation.
+     * Called when user clicks "Skip" or when stream completes.
      */
     skipToEnd() {
-        if (this._isDestroyed) return;
+        if (this._isDestroyed) {
+            return;
+        }
 
         // Cancel ongoing animation and idle timer
         this._cancelAnimation();
@@ -326,38 +357,63 @@ class TypewriterService {
 
         // Final update
         try {
-            this._onUpdate(this._displayedText);
+            if (this._onUpdate) {
+                this._onUpdate(this._displayedText);
+            }
         } catch (e) {
-            console.error('TypewriterService: Error in final onUpdate', e);
+            console.error('TypewriterService: Error in onUpdate callback during skipToEnd', e);
         }
     }
 
     /**
-     * Get the current displayed text
-     * @returns {string} The text currently shown to the user
+     * Get the currently displayed text.
+     * @returns {string} Currently displayed text
      */
     getDisplayedText() {
         return this._displayedText;
     }
 
     /**
-     * Check if animation is currently running
-     * @returns {boolean} True if animation is in progress
+     * Check if animation is currently running.
+     * @returns {boolean} True if animating
      */
     isAnimating() {
         return this._animationFrameId !== null;
     }
 
     /**
-     * Check if there's content waiting to be animated
-     * @returns {boolean} True if queue has content
+     * Check if there's pending content in the queue or current chunk.
+     * @returns {boolean} True if there's pending content
      */
     hasPendingContent() {
-        return this._queue.length > 0 || this._charIndex < this._currentChunk.length;
+        return (
+            this._queue.length > 0 ||
+            this._charIndex < this._currentChunk.length
+        );
     }
 
     /**
-     * Reset the service to initial state
+     * Get queue statistics for monitoring.
+     * @returns {Object} Queue statistics
+     */
+    getQueueStats() {
+        const queuedChars = this._queue.reduce((sum, c) => sum + c.length, 0);
+        const remainingInCurrent = this._currentChunk.length - this._charIndex;
+        const totalPending = queuedChars + remainingInCurrent;
+
+        return {
+            queueLength: this._queue.length,
+            queuedChars,
+            remainingInCurrent,
+            totalPending,
+            currentSpeed: this._getCharsPerFrame(),
+            isAnimating: this.isAnimating(),
+            rushMode: this._rushMode
+        };
+    }
+
+    /**
+     * Reset the service to initial state.
      */
     reset() {
         this._cancelAnimation();
@@ -370,10 +426,19 @@ class TypewriterService {
         this._startTime = 0;
         this._rushMode = false;
         this._rushCharsPerFrame = 0;
+        this._lastSpeedTier = undefined;
     }
 
     /**
-     * Clean up resources - MUST be called when done
+     * Update configuration dynamically.
+     * @param {Object} config - Configuration overrides
+     */
+    updateConfig(config) {
+        this._config = { ...this._config, ...config };
+    }
+
+    /**
+     * Clean up resources. Must be called when component is destroyed.
      */
     destroy() {
         this._isDestroyed = true;
@@ -384,19 +449,5 @@ class TypewriterService {
         this._currentChunk = '';
         this._onUpdate = null;
         this._onCursorChange = null;
-    }
-
-    /**
-     * Update configuration (allows dynamic speed changes)
-     * @param {Object} config - Configuration updates
-     */
-    updateConfig(config = {}) {
-        if (config.charsPerFrame !== undefined) {
-            TypewriterService.CONFIG.CHARS_PER_FRAME_TEXT = config.charsPerFrame;
-            TypewriterService.CONFIG.CHARS_PER_FRAME_MARKDOWN = config.charsPerFrame;
-        }
-        if (config.frameDelayMs !== undefined) {
-            TypewriterService.CONFIG.FRAME_DELAY_MS = config.frameDelayMs;
-        }
     }
 }

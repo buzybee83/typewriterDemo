@@ -160,10 +160,6 @@ let stats = {
 // DOM Elements
 const chatContainer = document.getElementById('chatContainer');
 const demoSelect = document.getElementById('demoSelect');
-const speedRange = document.getElementById('speedRange');
-const speedValue = document.getElementById('speedValue');
-const delayRange = document.getElementById('delayRange');
-const delayValue = document.getElementById('delayValue');
 const startBtn = document.getElementById('startBtn');
 const skipBtn = document.getElementById('skipBtn');
 const clearBtn = document.getElementById('clearBtn');
@@ -173,14 +169,6 @@ const charCountEl = document.getElementById('charCount');
 const statusEl = document.getElementById('status');
 
 // Initialize
-speedRange.addEventListener('input', (e) => {
-    speedValue.textContent = e.target.value;
-});
-
-delayRange.addEventListener('input', (e) => {
-    delayValue.textContent = e.target.value;
-});
-
 startBtn.addEventListener('click', startDemo);
 skipBtn.addEventListener('click', skipAnimation);
 clearBtn.addEventListener('click', clearChat);
@@ -261,6 +249,8 @@ function simulateStreaming(chunks, typewriter, isMarkdown) {
                 }
                 skipBtn.disabled = true;
                 startBtn.disabled = false;
+                const skipBtnChat = document.getElementById('skipBtnChat');
+                if (skipBtnChat) skipBtnChat.disabled = true;
                 statusEl.textContent = 'Ready';
             }, 300);
             return;
@@ -303,14 +293,25 @@ function startDemo() {
     // Create assistant message bubble
     currentMessageElement = addMessage('assistant', '');
 
-    // Get current settings
-    const charsPerFrame = parseInt(speedRange.value);
-    const frameDelayMs = parseInt(delayRange.value);
+    // Get all config settings from the settings panel
+    const config = {
+        charsPerFrame: parseInt(document.getElementById('charsPerFrame').value),
+        charsPerFrameMarkdown: parseInt(document.getElementById('charsPerFrameMarkdown').value),
+        charsPerFrameMedium: parseInt(document.getElementById('charsPerFrameMedium').value),
+        charsPerFrameHigh: parseInt(document.getElementById('charsPerFrameHigh').value),
+        charsPerFrameCatchingUp: parseInt(document.getElementById('charsPerFrameCatchingUp').value),
+        queueThresholdMedium: parseInt(document.getElementById('queueThresholdMedium').value),
+        queueThresholdHigh: parseInt(document.getElementById('queueThresholdHigh').value),
+        queueThresholdCritical: parseInt(document.getElementById('queueThresholdCritical').value),
+        maxAnimationTimeMs: parseInt(document.getElementById('maxAnimationTimeMs').value),
+        frameDelayMs: parseInt(document.getElementById('frameDelayMs').value),
+        idleCursorTimeoutMs: parseInt(document.getElementById('idleCursorTimeoutMs').value)
+    };
 
     // Track cursor state
     let showCursor = true;
 
-    // Create typewriter service
+    // Create typewriter service with full config
     currentTypewriter = new TypewriterService(
         (text) => {
             // Update callback - called on each frame
@@ -340,6 +341,7 @@ function startDemo() {
         },
         {
             isMarkdown: demo.isMarkdown,
+            config: config,
             onCursorChange: (visible) => {
                 // Cursor visibility callback
                 showCursor = visible;
@@ -356,15 +358,11 @@ function startDemo() {
         }
     );
 
-    // Update config
-    currentTypewriter.updateConfig({
-        charsPerFrame,
-        frameDelayMs
-    });
-
     // Update UI
     startBtn.disabled = true;
     skipBtn.disabled = false;
+    const skipBtnChat = document.getElementById('skipBtnChat');
+    if (skipBtnChat) skipBtnChat.disabled = false;
     statusEl.textContent = 'Streaming...';
 
     // Start simulated streaming
@@ -386,6 +384,9 @@ function skipAnimation() {
         currentTypewriter.skipToEnd();
         skipBtn.disabled = true;
         startBtn.disabled = false;
+        // Also update chat skip button
+        const skipBtnChat = document.getElementById('skipBtnChat');
+        if (skipBtnChat) skipBtnChat.disabled = true;
         statusEl.textContent = 'Skipped';
     }
 }
@@ -406,6 +407,8 @@ function clearChat() {
     statusEl.textContent = 'Ready';
     startBtn.disabled = false;
     skipBtn.disabled = true;
+    const skipBtnChat = document.getElementById('skipBtnChat');
+    if (skipBtnChat) skipBtnChat.disabled = true;
 }
 
 // Initial welcome message - show when chat opens
