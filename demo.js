@@ -235,24 +235,23 @@ function updateStats() {
 }
 
 // Simulate streaming: Send chunks with delays
-function simulateStreaming(chunks, typewriter, isMarkdown) {
+function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs) {
     let chunkIndex = 0;
 
     function sendNextChunk() {
         if (chunkIndex >= chunks.length) {
-            // All chunks sent - wait a brief moment then skip to end
+            // All chunks sent - let animation finish naturally, cursor will hide after idle timeout
             statusEl.textContent = 'Stream complete';
+            // If there's still content pending (queue or current chunk), rush to finish smoothly
+            if (typewriter && typewriter.hasPendingContent()) {
+                typewriter.rushToEnd(rushToEndMs);
+            }
+            // Disable skip button after a brief delay (let animation settle)
             setTimeout(() => {
-                // Skip to end to immediately hide cursor and finish animation
-                if (typewriter && typewriter.hasPendingContent()) {
-                    typewriter.skipToEnd();
-                }
                 skipBtn.disabled = true;
                 startBtn.disabled = false;
-                const skipBtnChat = document.getElementById('skipBtnChat');
-                if (skipBtnChat) skipBtnChat.disabled = true;
                 statusEl.textContent = 'Ready';
-            }, 300);
+            }, 1000);
             return;
         }
 
@@ -307,6 +306,9 @@ function startDemo() {
         frameDelayMs: parseInt(document.getElementById('frameDelayMs').value),
         idleCursorTimeoutMs: parseInt(document.getElementById('idleCursorTimeoutMs').value)
     };
+
+    // Get rushToEndMs separately for use in simulateStreaming
+    const rushToEndMs = parseInt(document.getElementById('rushToEndMs').value);
 
     // Cursor markers (matching POC implementation)
     const CURSOR_MARKER = '<span style="user-select:none;pointer-events:none;font-weight:400;color:black;font-size:1.35em;line-height:0">▏</span>';
@@ -412,12 +414,10 @@ function startDemo() {
     // Update UI
     startBtn.disabled = true;
     skipBtn.disabled = false;
-    const skipBtnChat = document.getElementById('skipBtnChat');
-    if (skipBtnChat) skipBtnChat.disabled = false;
     statusEl.textContent = 'Streaming...';
 
     // Start simulated streaming
-    simulateStreaming(demo.chunks, currentTypewriter, demo.isMarkdown);
+    simulateStreaming(demo.chunks, currentTypewriter, demo.isMarkdown, rushToEndMs);
 
     // Update stats periodically
     const statsInterval = setInterval(() => {

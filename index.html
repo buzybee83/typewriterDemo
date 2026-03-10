@@ -781,6 +781,16 @@
                                 </div>
                                 <div class="help-text">After animation ends</div>
                             </div>
+
+                            <div class="setting-group">
+                                <label for="rushToEndMs">Rush to End Duration (ms)</label>
+                                <input type="range" id="rushToEndMs" min="1000" max="10000" value="5000" step="500">
+                                <div class="range-display">
+                                    <span class="range-label">Speed up on stream end</span>
+                                    <span class="range-value" id="rushToEndMsValue">5000</span>
+                                </div>
+                                <div class="help-text">Time budget to finish smoothly</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -890,7 +900,7 @@
                 'charsPerFrame', 'charsPerFrameMarkdown', 'frameDelayMs',
                 'charsPerFrameMedium', 'charsPerFrameHigh', 'charsPerFrameCatchingUp',
                 'queueThresholdMedium', 'queueThresholdHigh', 'queueThresholdCritical',
-                'maxAnimationTimeMs', 'idleCursorTimeoutMs'
+                'maxAnimationTimeMs', 'idleCursorTimeoutMs', 'rushToEndMs'
             ];
 
             ranges.forEach(id => {
