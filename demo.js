@@ -166,6 +166,8 @@ const clearBtn = document.getElementById('clearBtn');
 const frameCountEl = document.getElementById('frameCount');
 const durationEl = document.getElementById('duration');
 const charCountEl = document.getElementById('charCount');
+const queueSizeEl = document.getElementById('queueSize');
+const speedTierEl = document.getElementById('speedTier');
 const statusEl = document.getElementById('status');
 
 // Initialize
@@ -231,6 +233,41 @@ function updateStats() {
     if (stats.startTime) {
         const elapsed = (Date.now() - stats.startTime) / 1000;
         durationEl.textContent = elapsed.toFixed(1) + 's';
+    }
+
+    // Update queue stats if typewriter service exists
+    if (currentTypewriter) {
+        const queueStats = currentTypewriter.getQueueStats();
+        queueSizeEl.textContent = queueStats.totalPending;
+
+        // Determine speed tier and apply styling
+        speedTierEl.className = 'stat-value'; // Reset classes
+
+        if (queueStats.rushMode) {
+            speedTierEl.textContent = 'RUSH';
+            speedTierEl.classList.add('speed-rush');
+        } else if (!queueStats.isAnimating) {
+            speedTierEl.textContent = 'IDLE';
+        } else {
+            // Get config to check thresholds
+            const queueThresholdCritical = parseInt(document.getElementById('queueThresholdCritical').value);
+            const queueThresholdHigh = parseInt(document.getElementById('queueThresholdHigh').value);
+            const queueThresholdMedium = parseInt(document.getElementById('queueThresholdMedium').value);
+
+            if (queueStats.totalPending > queueThresholdCritical) {
+                speedTierEl.textContent = 'CRITICAL';
+                speedTierEl.classList.add('speed-critical');
+            } else if (queueStats.totalPending > queueThresholdHigh) {
+                speedTierEl.textContent = 'HIGH';
+                speedTierEl.classList.add('speed-high');
+            } else if (queueStats.totalPending > queueThresholdMedium) {
+                speedTierEl.textContent = 'MEDIUM';
+                speedTierEl.classList.add('speed-medium');
+            } else {
+                speedTierEl.textContent = 'NORMAL';
+                speedTierEl.classList.add('speed-normal');
+            }
+        }
     }
 }
 
@@ -435,9 +472,6 @@ function skipAnimation() {
         currentTypewriter.skipToEnd();
         skipBtn.disabled = true;
         startBtn.disabled = false;
-        // Also update chat skip button
-        const skipBtnChat = document.getElementById('skipBtnChat');
-        if (skipBtnChat) skipBtnChat.disabled = true;
         statusEl.textContent = 'Skipped';
     }
 }
@@ -458,8 +492,6 @@ function clearChat() {
     statusEl.textContent = 'Ready';
     startBtn.disabled = false;
     skipBtn.disabled = true;
-    const skipBtnChat = document.getElementById('skipBtnChat');
-    if (skipBtnChat) skipBtnChat.disabled = true;
 }
 
 // Initial welcome message - show when chat opens
