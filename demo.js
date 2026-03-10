@@ -321,12 +321,17 @@ function startDemo() {
 
             // Update message bubble
             if (demo.isMarkdown) {
+                // Parse markdown
                 currentMessageElement.innerHTML = parseMarkdown(text);
-                // Add cursor if visible
+
+                // Add cursor after markdown content (gets re-added each frame since innerHTML replaces it)
                 if (showCursor) {
-                    currentMessageElement.innerHTML += '<span class="typewriter-cursor"></span>';
+                    const cursor = document.createElement('span');
+                    cursor.className = 'typewriter-cursor';
+                    currentMessageElement.appendChild(cursor);
                 }
             } else {
+                // Plain text - simpler approach
                 currentMessageElement.textContent = text;
                 // Add cursor if visible
                 if (showCursor) {
@@ -345,8 +350,9 @@ function startDemo() {
             onCursorChange: (visible) => {
                 // Cursor visibility callback
                 showCursor = visible;
+
+                // Send final update without cursor when hiding
                 if (!visible && currentMessageElement) {
-                    // Remove cursor when hidden - update content without cursor
                     const text = currentTypewriter.getDisplayedText();
                     if (demo.isMarkdown) {
                         currentMessageElement.innerHTML = parseMarkdown(text);
