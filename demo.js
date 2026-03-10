@@ -308,8 +308,61 @@ function startDemo() {
         idleCursorTimeoutMs: parseInt(document.getElementById('idleCursorTimeoutMs').value)
     };
 
+    // Cursor markers (matching POC implementation)
+    const CURSOR_MARKER = '<span style="user-select:none;pointer-events:none;font-weight:400;color:black;font-size:1.35em;line-height:0">▏</span>';
+    const CURSOR_MARKER_CODE = '▏';
+
+    // Check if we're inside a code block
+    function isInsideCodeBlock(text) {
+        let inside = false;
+        const lines = text.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].trimStart().startsWith('```')) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    // Get appropriate cursor based on context
+    function getCursor(text) {
+        return isInsideCodeBlock(text) ? CURSOR_MARKER_CODE : CURSOR_MARKER;
+    }
+
     // Track cursor state
-    let showCursor = true;
+    let cursorVisible = false;
+    let cursorBlinkOn = true;
+    let blinkInterval = null;
+
+    // Start cursor blinking (only when idle)
+    function startBlink() {
+        if (blinkInterval) return;
+        cursorBlinkOn = true;
+        blinkInterval = setInterval(() => {
+            // Only blink when animation is idle
+            if (currentTypewriter && !currentTypewriter.isAnimating()) {
+                cursorBlinkOn = !cursorBlinkOn;
+                // Update display with blink
+                const text = currentTypewriter.getDisplayedText();
+                const valueToSet = cursorVisible && cursorBlinkOn
+                    ? text + getCursor(text)
+                    : text;
+                if (demo.isMarkdown) {
+                    currentMessageElement.innerHTML = parseMarkdown(valueToSet);
+                } else {
+                    currentMessageElement.textContent = valueToSet;
+                }
+            }
+        }, 500);
+    }
+
+    function stopBlink() {
+        if (blinkInterval) {
+            clearInterval(blinkInterval);
+            blinkInterval = null;
+        }
+        cursorBlinkOn = true;
+    }
 
     // Create typewriter service with full config
     currentTypewriter = new TypewriterService(
@@ -319,26 +372,16 @@ function startDemo() {
             stats.charCount = text.length;
             updateStats();
 
+            // Append cursor inline to the text value (POC approach)
+            const valueToSet = cursorVisible
+                ? text + getCursor(text)
+                : text;
+
             // Update message bubble
             if (demo.isMarkdown) {
-                // Parse markdown
-                currentMessageElement.innerHTML = parseMarkdown(text);
-
-                // Add cursor after markdown content (gets re-added each frame since innerHTML replaces it)
-                if (showCursor) {
-                    const cursor = document.createElement('span');
-                    cursor.className = 'typewriter-cursor';
-                    currentMessageElement.appendChild(cursor);
-                }
+                currentMessageElement.innerHTML = parseMarkdown(valueToSet);
             } else {
-                // Plain text - simpler approach
-                currentMessageElement.textContent = text;
-                // Add cursor if visible
-                if (showCursor) {
-                    const cursor = document.createElement('span');
-                    cursor.className = 'typewriter-cursor';
-                    currentMessageElement.appendChild(cursor);
-                }
+                currentMessageElement.textContent = valueToSet;
             }
 
             // Auto-scroll
@@ -349,20 +392,22 @@ function startDemo() {
             config: config,
             onCursorChange: (visible) => {
                 // Cursor visibility callback
-                showCursor = visible;
-
-                // Send final update without cursor when hiding
-                if (!visible && currentMessageElement) {
-                    const text = currentTypewriter.getDisplayedText();
-                    if (demo.isMarkdown) {
-                        currentMessageElement.innerHTML = parseMarkdown(text);
-                    } else {
-                        currentMessageElement.textContent = text;
-                    }
+                cursorVisible = visible;
+                if (visible) {
+                    startBlink();
+                } else {
+                    stopBlink();
                 }
             }
         }
     );
+
+    // Clean up blink interval on destroy
+    const originalDestroy = currentTypewriter.destroy.bind(currentTypewriter);
+    currentTypewriter.destroy = () => {
+        stopBlink();
+        originalDestroy();
+    };
 
     // Update UI
     startBtn.disabled = true;
