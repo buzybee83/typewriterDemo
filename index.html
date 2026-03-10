@@ -14,122 +14,83 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        /* Main Wrapper */
+        .demo-wrapper {
+            display: flex;
+            height: 100vh;
             overflow: hidden;
+        }
+
+        /* Settings Panel (Left) */
+        .settings-panel {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
-            height: 90vh;
-            max-height: 700px;
+            overflow: hidden;
         }
 
-        .header {
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
-            text-align: center;
         }
 
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
+        .panel-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
         }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .chat-container {
+        .panel-content {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            background: #f5f5f5;
+            padding: 16px;
         }
 
-        .message {
-            margin-bottom: 16px;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.user {
-            text-align: right;
-        }
-
-        .message-bubble {
-            display: inline-block;
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            word-wrap: break-word;
-        }
-
-        .message.user .message-bubble {
-            background: #667eea;
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.assistant .message-bubble {
-            background: white;
-            color: #333;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .message-bubble.streaming {
-            position: relative;
-        }
-
-        .controls {
-            padding: 20px;
-            background: white;
+        /* Settings Sections */
+        .settings-section {
+            margin-top: 20px;
+            padding-top: 16px;
             border-top: 1px solid #e0e0e0;
         }
 
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
+        .settings-section:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .settings-section h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            margin-bottom: 16px;
         }
 
         .control-group label {
+            display: block;
             font-size: 12px;
             color: #666;
             font-weight: 500;
+            margin-bottom: 6px;
         }
 
         .control-group select,
         .control-group input[type="range"] {
+            width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -140,13 +101,16 @@
             padding: 0;
         }
 
-        .button-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        .range-value {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
         }
 
         button {
+            width: 100%;
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
@@ -154,16 +118,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            flex: 1;
-            min-width: 120px;
+            margin-bottom: 8px;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(0);
         }
 
@@ -187,31 +150,227 @@
             cursor: not-allowed;
         }
 
-        .typewriter-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em;
+        /* Chat Wrapper (Right) */
+        .chat-wrapper {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            width: 90%;
+            max-width: 600px;
+            height: 90%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: chatSlideIn 0.3s ease-out;
+        }
+
+        @keyframes chatSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .chat-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Messages Container */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        /* Messages */
+        .message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        /* User Message */
+        .user-message-bubble {
             background: #667eea;
-            margin-left: 2px;
-            vertical-align: text-bottom;
-            animation: blink 0.8s infinite;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            border-bottom-right-radius: 4px;
+            max-width: 75%;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+        /* Assistant Message */
+        .assistant-message-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            max-width: 85%;
         }
 
-        .stats {
-            font-size: 12px;
+        .assistant-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            font-size: 16px;
+        }
+
+        .assistant-message-bubble {
+            background: white;
+            color: #333;
+            padding: 12px 16px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.5;
+            flex: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Markdown styles */
+        .assistant-message-bubble h1,
+        .assistant-message-bubble h2,
+        .assistant-message-bubble h3 {
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .assistant-message-bubble h1 { font-size: 1.5em; }
+        .assistant-message-bubble h2 { font-size: 1.3em; }
+        .assistant-message-bubble h3 { font-size: 1.1em; }
+
+        .assistant-message-bubble ul,
+        .assistant-message-bubble ol {
+            margin: 10px 0;
+            padding-left: 24px;
+        }
+
+        .assistant-message-bubble li {
+            margin: 6px 0;
+        }
+
+        .assistant-message-bubble code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        .assistant-message-bubble pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 14px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .assistant-message-bubble pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .assistant-message-bubble strong {
+            font-weight: 600;
+        }
+
+        .assistant-message-bubble blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 16px;
+            margin: 12px 0;
             color: #666;
-            margin-top: 12px;
-            padding-top: 12px;
+            font-style: italic;
+        }
+
+        .assistant-message-bubble table {
+            border-collapse: collapse;
+            margin: 12px 0;
+            width: 100%;
+        }
+
+        .assistant-message-bubble table th,
+        .assistant-message-bubble table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .assistant-message-bubble table th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        /* Stats Footer */
+        .stats-footer {
+            padding: 12px 20px;
+            background: white;
             border-top: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
+            font-size: 11px;
+            color: #666;
         }
 
         .stat-item {
@@ -223,99 +382,17 @@
         .stat-label {
             font-weight: 600;
         }
-
-        /* Markdown styles */
-        .message-bubble h1,
-        .message-bubble h2,
-        .message-bubble h3 {
-            margin: 8px 0 4px 0;
-            font-weight: 600;
-        }
-
-        .message-bubble h1 { font-size: 1.4em; }
-        .message-bubble h2 { font-size: 1.2em; }
-        .message-bubble h3 { font-size: 1.1em; }
-
-        .message-bubble ul,
-        .message-bubble ol {
-            margin: 8px 0;
-            padding-left: 20px;
-        }
-
-        .message-bubble li {
-            margin: 4px 0;
-        }
-
-        .message-bubble code {
-            background: #f5f5f5;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        .message-bubble pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 8px 0;
-        }
-
-        .message-bubble pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
-        }
-
-        .message-bubble strong {
-            font-weight: 600;
-        }
-
-        .message-bubble em {
-            font-style: italic;
-        }
-
-        .message-bubble blockquote {
-            border-left: 3px solid #667eea;
-            padding-left: 12px;
-            margin: 8px 0;
-            color: #666;
-        }
-
-        .message-bubble table {
-            border-collapse: collapse;
-            margin: 8px 0;
-            width: 100%;
-        }
-
-        .message-bubble table th,
-        .message-bubble table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .message-bubble table th {
-            background: #f5f5f5;
-            font-weight: 600;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 Typewriter Effect Demo</h1>
-            <p>See streaming text animation in action</p>
-        </div>
-
-        <div class="chat-container" id="chatContainer">
-            <!-- Messages will appear here -->
-        </div>
-
-        <div class="controls">
-            <div class="controls-grid">
+    <div class="demo-wrapper">
+        <!-- Settings Panel (Left) -->
+        <div class="settings-panel">
+            <div class="panel-header">
+                <h2>⚙️ Settings</h2>
+            </div>
+            <div class="panel-content">
+                <!-- Demo Content -->
                 <div class="control-group">
                     <label for="demoSelect">Demo Content</label>
                     <select id="demoSelect">
@@ -327,41 +404,63 @@
                     </select>
                 </div>
 
-                <div class="control-group">
-                    <label for="speedRange">Animation Speed (chars/frame)</label>
-                    <input type="range" id="speedRange" min="1" max="10" value="1" step="1">
-                    <span id="speedValue">1</span>
+                <!-- Animation Settings -->
+                <div class="settings-section">
+                    <h3>Animation Settings</h3>
+                    <div class="control-group">
+                        <label for="speedRange">
+                            Speed (chars/frame) <span class="range-value" id="speedValue">1</span>
+                        </label>
+                        <input type="range" id="speedRange" min="1" max="10" value="1" step="1">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="delayRange">
+                            Frame Delay (ms) <span class="range-value" id="delayValue">40</span>
+                        </label>
+                        <input type="range" id="delayRange" min="16" max="100" value="40" step="4">
+                    </div>
                 </div>
 
-                <div class="control-group">
-                    <label for="delayRange">Frame Delay (ms)</label>
-                    <input type="range" id="delayRange" min="16" max="100" value="40" step="4">
-                    <span id="delayValue">40</span>
+                <!-- Actions -->
+                <div class="settings-section">
+                    <h3>Actions</h3>
+                    <button class="primary" id="startBtn">Start Demo</button>
+                    <button class="secondary" id="skipBtn" disabled>Skip Animation</button>
+                    <button class="danger" id="clearBtn">Clear Chat</button>
                 </div>
             </div>
+        </div>
 
-            <div class="button-group">
-                <button class="primary" id="startBtn">Start Demo</button>
-                <button class="secondary" id="skipBtn" disabled>Skip Animation</button>
-                <button class="danger" id="clearBtn">Clear Chat</button>
-            </div>
+        <!-- Chat Interface (Right) -->
+        <div class="chat-wrapper">
+            <div class="chat-interface">
+                <div class="chat-header">
+                    <h1>🚀 Typewriter Effect Demo</h1>
+                    <p>See streaming text animation in action</p>
+                </div>
 
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-label">Frames:</span>
-                    <span id="frameCount">0</span>
+                <div class="messages-container" id="chatContainer">
+                    <!-- Messages will appear here -->
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">Duration:</span>
-                    <span id="duration">0.0s</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Chars:</span>
-                    <span id="charCount">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Status:</span>
-                    <span id="status">Ready</span>
+
+                <div class="stats-footer">
+                    <div class="stat-item">
+                        <span class="stat-label">Frames:</span>
+                        <span id="frameCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Duration:</span>
+                        <span id="duration">0.0s</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Chars:</span>
+                        <span id="charCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Status:</span>
+                        <span id="status">Ready</span>
+                    </div>
                 </div>
             </div>
         </div>
