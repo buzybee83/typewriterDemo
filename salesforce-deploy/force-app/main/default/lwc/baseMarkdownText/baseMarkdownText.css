@@ -1,0 +1,57 @@
+.markdown-wrapper {
+    font-size: 0.8125rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    margin: 0;
+    white-space: normal;
+
+    -webkit-hyphens: manual;
+    -ms-hyphens: manual;
+    hyphens: manual;
+}
+.markdown-wrapper.slds-rich-text-editor__output code,
+pre,
+samp {
+    white-space: pre-wrap;
+}
+
+.markdown-wrapper pre:only-child {
+    margin: 0;
+}
+
+.markdown-wrapper a {
+    text-decoration: none;
+}
+
+/* Enhanced code styling */
+.markdown-wrapper code {
+    background-color: #f3f3f3;
+    color: #181818;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid #c9c9c9;
+}
+
+.markdown-wrapper pre {
+    background-color: #f3f3f3;
+    border: 1px solid #c9c9c9;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-wrapper pre code {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "typewriter-effect-demo",
+  "version": "1.0.0",
+  "description": "Standalone typewriter effect demonstration for streaming text",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "npx http-server -p 8000 -o"
+  },
+  "keywords": [
+    "typewriter",
+    "animation",
+    "streaming",
+    "chat",
+    "ui",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

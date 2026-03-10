@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaseMarkdownText Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Salesforce Design Tokens */
+            --slds-g-color-neutral-base-10: #181818;
+            --slds-g-color-neutral-base-80: #c9c9c9;
+            --slds-g-color-neutral-base-95: #f3f3f3;
+            --slds-g-font-size-base: 0.8125rem;
+            --slds-g-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --slds-g-font-family-monospace: 'Courier New', Courier, monospace;
+            --slds-g-font-lineheight-base: 1.5;
+            --slds-g-sizing-1: 0.125rem;
+            --slds-g-sizing-2: 0.25rem;
+            --slds-g-sizing-4: 0.5rem;
+            --slds-g-spacing-3: 0.75rem;
+            --slds-g-spacing-4: 1rem;
+            --slds-g-sizing-border-1: 1px;
+            --slds-g-radius-border-1: 0.25rem;
+            --slds-g-radius-border-2: 0.5rem;
+            --slds-g-font-scale-1: 0.75rem;
+            --slds-g-font-scale-3: 0.875rem;
+            --slds-g-font-weight-4: 400;
+            --slds-g-font-weight-5: 500;
+            --slds-g-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: var(--slds-g-font-family);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .demo-panel {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+
+        .citations-panel {
+            width: 300px;
+            padding: 24px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        /* Markdown Wrapper Styles - Extracted from baseMarkdownText.css */
+        .markdown-wrapper {
+            font-size: var(--slds-g-font-size-base);
+            font-family: var(--slds-g-font-family);
+            line-height: var(--slds-g-font-lineheight-base);
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            margin: 0;
+            white-space: normal;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .markdown-wrapper code,
+        .markdown-wrapper pre,
+        .markdown-wrapper samp {
+            white-space: pre-wrap;
+        }
+
+        .markdown-wrapper pre:only-child {
+            margin: 0;
+        }
+
+        .markdown-wrapper a {
+            text-decoration: none;
+            color: #0176d3;
+            font-weight: 500;
+        }
+
+        .markdown-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        /* Citation links */
+        .markdown-wrapper a[href="#"] {
+            background: #667eea;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .markdown-wrapper a[href="#"]:hover {
+            background: #5568d3;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced code styling */
+        .markdown-wrapper code {
+            background-color: var(--slds-g-color-neutral-base-95);
+            color: var(--slds-g-color-neutral-base-10);
+            padding: var(--slds-g-sizing-1) var(--slds-g-sizing-2);
+            border-radius: var(--slds-g-radius-border-1);
+            font-family: var(--slds-g-font-family-monospace);
+            font-size: var(--slds-g-font-scale-1);
+            font-weight: var(--slds-g-font-weight-5);
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-neutral-base-80);
+        }
+
+        .markdown-wrapper pre {
+            background-color: var(--slds-g-color-neutral-base-95);
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-neutral-base-80);
+            border-radius: var(--slds-g-radius-border-2);
+            padding: var(--slds-g-spacing-4);
+            margin: var(--slds-g-spacing-3) 0;
+            overflow-x: auto;
+            box-shadow: var(--slds-g-shadow-1);
+        }
+
+        .markdown-wrapper pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-size: var(--slds-g-font-scale-3);
+            font-weight: var(--slds-g-font-weight-4);
+        }
+
+        /* Citation card */
+        .citation-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .citation-card:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+
+        .citation-card.active {
+            background: #e8eaf6;
+            border-color: #667eea;
+        }
+
+        .citation-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .citation-type {
+            display: inline-block;
+            background: #e0e0e0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .citation-type.record {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .citation-type.link {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .citation-value {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .controls {
+            padding: 20px 24px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .event-log {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .event-log-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .event-item {
+            font-size: 12px;
+            color: #333;
+            padding: 4px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-time {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .demo-select {
+            margin-bottom: 16px;
+        }
+
+        .demo-select select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .citations-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e0e0e0;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 BaseMarkdownText Demo</h1>
+            <p>Markdown rendering with citations, sanitization, and link handling</p>
+        </div>
+
+        <div class="content">
+            <div class="demo-panel">
+                <div class="section-title">Rendered Markdown</div>
+
+                <div class="demo-select">
+                    <select id="demoSelect">
+                        <option value="citations">With Citations</option>
+                        <option value="rich">Rich Markdown</option>
+                        <option value="code">Code Examples</option>
+                        <option value="table">Tables & Lists</option>
+                    </select>
+                </div>
+
+                <div class="markdown-wrapper" id="markdownOutput">
+                    <!-- Markdown content will be rendered here -->
+                </div>
+            </div>
+
+            <div class="citations-panel">
+                <div class="section-title">Citations</div>
+                <div id="citationsContainer">
+                    <!-- Citation cards will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="button-group">
+                <button class="primary" id="renderBtn">Render Demo</button>
+                <button class="secondary" id="clearBtn">Clear</button>
+            </div>
+
+            <div class="event-log">
+                <div class="event-log-title">Event Log</div>
+                <div id="eventLog">
+                    <div class="event-item">Ready to render markdown content</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="markdown-utils.js"></script>
+    <script src="markdown-demo.js"></script>
+</body>
+</html>

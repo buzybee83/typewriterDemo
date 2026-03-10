@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Markdown Demo - Performance Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Salesforce Design Tokens - from codebase */
+            --slds-g-color-neutral-base-10: #181818;
+            --slds-g-color-neutral-base-80: #c9c9c9;
+            --slds-g-color-neutral-base-95: #f3f3f3;
+            --slds-g-font-size-base: 0.8125rem;
+            --slds-g-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --slds-g-font-family-monospace: 'Courier New', Courier, monospace;
+            --slds-g-font-lineheight-base: 1.5;
+            --slds-g-sizing-1: 0.125rem;
+            --slds-g-sizing-2: 0.25rem;
+            --slds-g-sizing-4: 0.5rem;
+            --slds-g-spacing-3: 0.75rem;
+            --slds-g-spacing-4: 1rem;
+            --slds-g-sizing-border-1: 1px;
+            --slds-g-radius-border-1: 0.25rem;
+            --slds-g-radius-border-2: 0.5rem;
+            --slds-g-font-scale-1: 0.75rem;
+            --slds-g-font-scale-3: 0.875rem;
+            --slds-g-font-weight-4: 400;
+            --slds-g-font-weight-5: 500;
+            --slds-g-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: var(--slds-g-font-family);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 800px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 13px;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+            /* Optimize rendering performance */
+            overflow-anchor: auto;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            /* Performance optimizations to reduce jitter */
+            contain: layout style paint;
+            will-change: contents;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        /* Markdown Styles - Exact from baseMarkdownText.css */
+        .markdown-wrapper {
+            font-size: var(--slds-g-font-size-base);
+            font-family: var(--slds-g-font-family);
+            line-height: var(--slds-g-font-lineheight-base);
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            margin: 0;
+            white-space: normal;
+
+            /* Smooth content changes - GPU accelerated */
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+
+        /* Smooth transitions for all markdown elements */
+        .markdown-wrapper * {
+            animation: fadeInContent 0.15s ease-out;
+        }
+
+        @keyframes fadeInContent {
+            from {
+                opacity: 0.7;
+                transform: translateY(2px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .markdown-wrapper code,
+        .markdown-wrapper pre,
+        .markdown-wrapper samp {
+            white-space: pre-wrap;
+        }
+
+        .markdown-wrapper pre:only-child {
+            margin: 0;
+        }
+
+        .markdown-wrapper a {
+            text-decoration: none;
+            color: #0176d3;
+            font-weight: 500;
+        }
+
+        .markdown-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-wrapper code {
+            background-color: var(--slds-g-color-neutral-base-95);
+            color: var(--slds-g-color-neutral-base-10);
+            padding: var(--slds-g-sizing-1) var(--slds-g-sizing-2);
+            border-radius: var(--slds-g-radius-border-1);
+            font-family: var(--slds-g-font-family-monospace);
+            font-size: var(--slds-g-font-scale-1);
+            font-weight: var(--slds-g-font-weight-5);
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-neutral-base-80);
+        }
+
+        .markdown-wrapper pre {
+            background-color: var(--slds-g-color-neutral-base-95);
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-neutral-base-80);
+            border-radius: var(--slds-g-radius-border-2);
+            padding: var(--slds-g-spacing-4);
+            margin: var(--slds-g-spacing-3) 0;
+            overflow-x: auto;
+            box-shadow: var(--slds-g-shadow-1);
+        }
+
+        .markdown-wrapper pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-size: var(--slds-g-font-scale-3);
+            font-weight: var(--slds-g-font-weight-4);
+        }
+
+        .markdown-wrapper h1,
+        .markdown-wrapper h2,
+        .markdown-wrapper h3 {
+            animation: slideInFromLeft 0.2s ease-out;
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .markdown-wrapper h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .markdown-wrapper ul,
+        .markdown-wrapper ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .markdown-wrapper li {
+            margin: 4px 0;
+            animation: fadeInContent 0.15s ease-out;
+        }
+
+        .markdown-wrapper p {
+            margin: 8px 0;
+        }
+
+        /* Smooth code block appearance */
+        .markdown-wrapper pre {
+            animation: expandIn 0.25s ease-out;
+        }
+
+        @keyframes expandIn {
+            from {
+                opacity: 0;
+                transform: scaleY(0.95);
+                transform-origin: top;
+            }
+            to {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+        }
+
+        .controls {
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .controls-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-group label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .control-group input {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        button.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .performance {
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            font-size: 11px;
+        }
+
+        .perf-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .perf-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .perf-label {
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .perf-value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .perf-unit {
+            color: #999;
+            font-size: 10px;
+        }
+
+        .perf-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧁 Streaming Markdown - Performance Test</h1>
+            <p>Using exact markdown from codebase mock data</p>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="controls">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Speed (chars/frame)</label>
+                    <input type="number" id="speedInput" value="1" min="1" max="10">
+                </div>
+                <div class="control-group">
+                    <label>Frame Delay (ms)</label>
+                    <input type="number" id="delayInput" value="40" min="16" max="100" step="4">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 12px; padding: 10px; background: #d1ecf1; border-radius: 6px; font-size: 11px; color: #0c5460;">
+                <strong>✨ Jitter Reduction Active:</strong><br>
+                • <strong>CSS Animations</strong> - Smooth fade-in for new elements<br>
+                • <strong>GPU Acceleration</strong> - Hardware-accelerated rendering<br>
+                • <strong>Throttled Scroll</strong> - Updates every 3 frames<br>
+                <br>
+                <strong>💡 Try:</strong> 2 chars/frame @ 50ms for best smoothness
+            </div>
+
+            <div class="button-group">
+                <button class="primary" id="startBtn">Start Streaming</button>
+                <button class="secondary" id="skipBtn" disabled>Skip Animation</button>
+                <button class="danger" id="clearBtn">Clear Chat</button>
+            </div>
+
+            <div class="performance">
+                <div class="perf-title">Performance Metrics</div>
+                <div class="perf-grid">
+                    <div class="perf-metric">
+                        <span class="perf-label">Frames</span>
+                        <span class="perf-value" id="frameCount">0</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Duration</span>
+                        <span class="perf-value"><span id="duration">0.0</span><span class="perf-unit">s</span></span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Chars</span>
+                        <span class="perf-value" id="charCount">0</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Parse Avg</span>
+                        <span class="perf-value"><span id="parseAvg">0.0</span><span class="perf-unit">ms</span></span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Parse Max</span>
+                        <span class="perf-value"><span id="parseMax">0.0</span><span class="perf-unit">ms</span></span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">FPS</span>
+                        <span class="perf-value" id="fps">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="typewriter.js"></script>
+    <script src="markdown-utils.js"></script>
+    <script src="streaming-markdown-simple.js"></script>
+</body>
+</html>

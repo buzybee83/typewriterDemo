@@ -1,0 +1,114 @@
+<template>
+    <div class="demo-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧁 Streaming Markdown Demo (LWC)</h1>
+            <p>Typewriter effect with live markdown rendering</p>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <template for:each={messages} for:item="msg">
+                <div key={msg.id} class={msg.cssClass}>
+                    <div class="message-bubble">
+                        <template if:true={msg.isUser}>
+                            {msg.content}
+                        </template>
+                        <template if:false={msg.isUser}>
+                            <!-- BaseMarkdownText component would go here -->
+                            <runtime_copilot_base-base-markdown-text
+                                if:true={msg.isAssistant}
+                                value={msg.content}
+                                data-streaming-component
+                            ></runtime_copilot_base-base-markdown-text>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Speed (chars/frame)</label>
+                    <lightning-input
+                        type="number"
+                        value={charsPerFrame}
+                        min="1"
+                        max="10"
+                        onchange={handleSpeedChange}
+                    ></lightning-input>
+                </div>
+                <div class="control-group">
+                    <label>Frame Delay (ms)</label>
+                    <lightning-input
+                        type="number"
+                        value={frameDelayMs}
+                        min="16"
+                        max="100"
+                        step="4"
+                        onchange={handleDelayChange}
+                    ></lightning-input>
+                </div>
+            </div>
+
+            <div class="info-banner">
+                <strong>✨ Jitter Reduction:</strong>
+                CSS animations, GPU acceleration, throttled scroll
+                <br>
+                <strong>💡 Try:</strong> 2 chars/frame @ 50ms for best smoothness
+            </div>
+
+            <div class="button-group">
+                <lightning-button
+                    label="Start Streaming"
+                    variant="brand"
+                    onclick={startStreaming}
+                    disabled={isStreaming}
+                ></lightning-button>
+                <lightning-button
+                    label="Skip Animation"
+                    onclick={skipStreaming}
+                    disabled={skipDisabled}
+                ></lightning-button>
+                <lightning-button
+                    label="Clear Chat"
+                    variant="destructive"
+                    onclick={clearChat}
+                ></lightning-button>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="performance">
+                <div class="perf-title">Performance Metrics</div>
+                <div class="perf-grid">
+                    <div class="perf-metric">
+                        <span class="perf-label">Frames</span>
+                        <span class="perf-value">{stats.frames}</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Duration</span>
+                        <span class="perf-value">{stats.duration}s</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Chars</span>
+                        <span class="perf-value">{stats.chars}</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Parse Avg</span>
+                        <span class="perf-value">{stats.parseAvg}ms</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">Parse Max</span>
+                        <span class="perf-value">{stats.parseMax}ms</span>
+                    </div>
+                    <div class="perf-metric">
+                        <span class="perf-label">FPS</span>
+                        <span class="perf-value">{stats.fps}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

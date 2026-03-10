@@ -1,0 +1,468 @@
+<template>
+    <div class="demo-wrapper">
+        <!-- Settings Panel (Left) -->
+        <div class="settings-panel">
+            <div class="panel-header">
+                <h2>⚙️ Settings</h2>
+            </div>
+            <div class="panel-content">
+                <!-- Scenario Selector -->
+                <lightning-combobox
+                    name="scenario"
+                    label="Streaming Scenario"
+                    value={selectedScenario}
+                    placeholder="Choose a scenario"
+                    options={scenarioOptions}
+                    onchange={handleScenarioChange}
+                        disabled={scenarioControlsDisabled}
+                ></lightning-combobox>
+
+                <lightning-button
+                    label="Create Custom Scenario"
+                    variant="neutral"
+                    icon-name="utility:add"
+                    onclick={toggleCustomScenarioForm}
+                    disabled={scenarioControlsDisabled}
+                    class="slds-m-top_x-small"
+                ></lightning-button>
+
+                <!-- Custom Scenario Form -->
+                <template if:true={showCustomScenarioForm}>
+                    <div class="custom-scenario-form">
+                        <div class="form-header">
+                            <h3>Create Custom Scenario</h3>
+                            <lightning-button-icon
+                                icon-name="utility:close"
+                                alternative-text="Close"
+                                onclick={toggleCustomScenarioForm}
+                            ></lightning-button-icon>
+                        </div>
+
+                        <lightning-input
+                            label="Scenario Title"
+                            value={customScenarioTitle}
+                            onchange={handleCustomTitleChange}
+                            placeholder="My Custom Scenario"
+                            required
+                        ></lightning-input>
+
+                        <lightning-textarea
+                            label="Scenario JSON"
+                            value={customScenarioJson}
+                            onchange={handleCustomJsonChange}
+                            placeholder="Enter JSON configuration"
+                            rows="6"
+                            required
+                        ></lightning-textarea>
+
+                        <div class="example-block">
+                            <h4>Example:</h4>
+                            <pre><code>{exampleScenarioJson}</code></pre>
+                        </div>
+
+                        <template if:true={customScenarioError}>
+                            <div class="error-message">{customScenarioError}</div>
+                        </template>
+
+                        <div class="form-actions">
+                            <lightning-button
+                                label="Cancel"
+                                onclick={toggleCustomScenarioForm}
+                            ></lightning-button>
+                            <lightning-button
+                                label="Save"
+                                variant="brand"
+                                onclick={saveCustomScenario}
+                            ></lightning-button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Custom Scenarios List -->
+                <template if:true={hasCustomScenarios}>
+                    <div class="custom-scenarios-list">
+                        <h4>Custom Scenarios</h4>
+                        <template for:each={customScenariosArray} for:item="scenario">
+                            <div key={scenario.key} class="custom-scenario-item">
+                                <span>{scenario.label}</span>
+                                <lightning-button-icon
+                                    icon-name="utility:delete"
+                                    alternative-text="Delete"
+                                    data-key={scenario.key}
+                                    onclick={deleteCustomScenario}
+                                    disabled={isStreaming}
+                                    size="small"
+                                    variant="bare"
+                                ></lightning-button-icon>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Animation Settings -->
+                <div class="settings-section">
+                    <h3>Animation Settings</h3>
+                    <lightning-input
+                        label="Speed (chars/frame)"
+                        type="range"
+                        value={charsPerFrame}
+                        min="1"
+                        max="10"
+                        step="1"
+                        onchange={handleSpeedChange}
+                    ></lightning-input>
+
+                    <lightning-input
+                        label="Frame Delay (ms)"
+                        type="range"
+                        value={frameDelayMs}
+                        min="10"
+                        max="100"
+                        step="5"
+                        onchange={handleDelayChange}
+                    ></lightning-input>
+
+                    <lightning-input
+                        label="Chat Max Width (px)"
+                        type="number"
+                        value={chatMaxWidth}
+                        min="320"
+                        max="800"
+                        step="20"
+                        onchange={handleMaxWidthChange}
+                    ></lightning-input>
+
+                    <lightning-button
+                        label={advancedSettingsLabel}
+                        icon-name={advancedSettingsIcon}
+                        variant="neutral"
+                        onclick={toggleAdvancedSettings}
+                        class="slds-m-top_small"
+                    ></lightning-button>
+
+                    <!-- Advanced Settings -->
+                    <template if:true={showAdvancedSettings}>
+                        <div class="advanced-settings">
+                            <lightning-input
+                                label="Medium Speed (chars/frame)"
+                                type="range"
+                                value={charsPerFrameMedium}
+                                min="1"
+                                max="10"
+                                step="1"
+                                field-level-help="Speed when queue exceeds medium threshold"
+                                onchange={handleMediumSpeedChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="High Speed (chars/frame)"
+                                type="range"
+                                value={charsPerFrameHigh}
+                                min="1"
+                                max="10"
+                                step="1"
+                                field-level-help="Speed when queue exceeds high threshold"
+                                onchange={handleHighSpeedChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Catch-Up Speed (chars/frame)"
+                                type="range"
+                                value={charsPerFrameCatchingUp}
+                                min="1"
+                                max="20"
+                                step="1"
+                                field-level-help="Speed when queue exceeds critical threshold"
+                                onchange={handleCatchUpSpeedChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Queue Threshold Medium"
+                                type="number"
+                                value={queueThresholdMedium}
+                                min="10"
+                                max="200"
+                                step="5"
+                                field-level-help="Start speeding up animation (chars)"
+                                onchange={handleThresholdMediumChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Queue Threshold High"
+                                type="number"
+                                value={queueThresholdHigh}
+                                min="20"
+                                max="300"
+                                step="5"
+                                field-level-help="Further increase speed (chars)"
+                                onchange={handleThresholdHighChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Queue Threshold Critical"
+                                type="number"
+                                value={queueThresholdCritical}
+                                min="50"
+                                max="500"
+                                step="10"
+                                field-level-help="Maximum catch-up speed (chars)"
+                                onchange={handleThresholdCriticalChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Max Animation Time (ms)"
+                                type="number"
+                                value={maxAnimationTimeMs}
+                                min="5000"
+                                max="60000"
+                                step="1000"
+                                field-level-help="Auto skip-to-end if animation exceeds this duration"
+                                onchange={handleMaxAnimationTimeChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Idle Cursor Timeout (ms)"
+                                type="number"
+                                value={idleCursorTimeoutMs}
+                                min="500"
+                                max="5000"
+                                step="100"
+                                field-level-help="How long cursor stays visible after animation completes"
+                                onchange={handleIdleCursorTimeoutChange}
+                            ></lightning-input>
+
+                            <lightning-input
+                                label="Rush to End Duration (ms)"
+                                type="number"
+                                value={rushToEndDurationMs}
+                                min="1000"
+                                max="10000"
+                                step="500"
+                                field-level-help="Time budget to finish remaining content when stream ends"
+                                onchange={handleRushToEndDurationChange}
+                            ></lightning-input>
+
+                            <!-- Info Section -->
+                            <div class="settings-info-box">
+                                <div class="info-header">
+                                    <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                                    <span>How These Settings Work Together</span>
+                                </div>
+                                <ul class="info-list">
+                                    <li><strong>Rush to End Duration:</strong> When the stream completes but content is still in the queue, the animation speeds up to finish smoothly within this time budget (default: 5s).</li>
+                                    <li><strong>Max Animation Time:</strong> Safety timeout that abruptly skips to the end if the total animation runs too long (default: 10s). This prevents infinite animations if something goes wrong.</li>
+                                    <li><strong>Relationship:</strong> Max Animation Time should be 2x Rush to End Duration to give a buffer. Normal finish uses Rush to End (smooth), safety timeout uses Max Animation Time (abrupt).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="settings-section">
+                    <h3>Actions</h3>
+                    <div class="slds-grid slds-grid_vertical slds-grid_vertical-stretch">
+                        <lightning-button
+                            label="Send Stream"
+                            variant="brand"
+                            onclick={startStreaming}
+                            disabled={actionButtonsDisabled}
+                            class="slds-m-bottom_x-small"
+                            stretch="true"
+                        ></lightning-button>
+                        <lightning-button
+                            label="Skip Animation"
+                            onclick={skipStreaming}
+                            disabled={skipButtonDisabled}
+                            class="slds-m-bottom_x-small"
+                            stretch="true"
+                        ></lightning-button>
+                        <lightning-button
+                            label="Clear Chat"
+                            variant="destructive"
+                            onclick={clearChat}
+                            disabled={isChatMinimized}
+                            stretch="true"
+                        ></lightning-button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Chat Interface (Right) -->
+        <div class="chat-wrapper">
+            <!-- Queue Visualizer -->
+            <template if:true={showQueueStats}>
+                <div class="queue-visualizer">
+                    <div class="queue-header">
+                        <h3>Queue Dynamics</h3>
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            alternative-text="Hide"
+                            size="small"
+                            variant="bare"
+                            onclick={toggleQueueStats}
+                        ></lightning-button-icon>
+                    </div>
+                    <div class="queue-stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Chunks in Queue:</span>
+                            <span class="stat-value">{queueStats.queueLength}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Pending Chars:</span>
+                            <span class="stat-value">{queueStats.totalPending}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Current Speed:</span>
+                            <span class="stat-value">{queueStats.currentSpeed} chars/frame</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Status:</span>
+                            <span class={queueStatusClass}>{queueStats.statusText}</span>
+                        </div>
+                    </div>
+                    <!-- Markdown Parsing Performance -->
+                    <div class="parse-metrics">
+                        <div class="parse-header-wrapper">
+                            <div class="parse-header">Markdown Parsing</div>
+                            <lightning-helptext
+                                content="Parse time increases with content length. Higher values on longer streams are normal and expected."
+                                icon-variant="bare"
+                            ></lightning-helptext>
+                        </div>
+                        <div class="parse-stats">
+                            <div class="parse-stat">
+                                <span class="parse-label">Avg:</span>
+                                <span class="parse-value">{stats.parseAvg}ms</span>
+                            </div>
+                            <div class="parse-stat">
+                                <span class="parse-label">Max:</span>
+                                <span class="parse-value">{stats.parseMax}ms</span>
+                            </div>
+                            <div class="parse-stat">
+                                <span class="parse-label">Count:</span>
+                                <span class="parse-value">{stats.parseCount}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Animation Performance -->
+                    <div class="parse-metrics">
+                        <div class="parse-header">Animation Performance</div>
+                        <div class="perf-grid-compact">
+                            <div class="perf-row">
+                                <span class="perf-label">Frames:</span>
+                                <span class="perf-value">{stats.frames}</span>
+                            </div>
+                            <div class="perf-row">
+                                <span class="perf-label">Duration:</span>
+                                <span class="perf-value">{stats.duration}s</span>
+                            </div>
+                            <div class="perf-row">
+                                <span class="perf-label">Chars:</span>
+                                <span class="perf-value">{stats.chars}</span>
+                            </div>
+                            <div class="perf-row">
+                                <span class="perf-label">FPS:</span>
+                                <span class="perf-value">{stats.fps}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Queue Bar -->
+                    <div class="queue-bar-wrapper">
+                        <div class="queue-bar-container">
+                            <div class="queue-bar" style={queueBarStyle}></div>
+                        </div>
+                        <div class="queue-bar-labels">
+                            <span class="bar-label">0</span>
+                            <span class="bar-label">{queueThresholdMedium} (Med)</span>
+                            <span class="bar-label">{queueThresholdHigh} (High)</span>
+                            <span class="bar-label">{queueThresholdCritical} (Crit)</span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Show Queue Stats Button (when hidden) -->
+            <template if:false={showQueueStats}>
+                <button class="queue-stats-toggle" onclick={toggleQueueStats}>
+                    Show Queue Dynamics
+                </button>
+            </template>
+
+            <!-- Minimized Chat Button -->
+            <template if:true={isChatMinimized}>
+                <button class="chat-fab" onclick={toggleChatMinimized}>
+                    <span class="fab-text">Ask Me Anything</span>
+                    <lightning-icon icon-name="standard:bot" size="medium"></lightning-icon>
+                </button>
+            </template>
+
+            <!-- Expanded Chat Interface -->
+            <template if:false={isChatMinimized}>
+                <div class="chat-interface" style={chatWidthStyle}>
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <div class="chat-header-content">
+                            <lightning-icon icon-name="standard:bot" size="small"></lightning-icon>
+                            <span class="chat-title">Chat</span>
+                        </div>
+                        <lightning-button-icon
+                            icon-name="utility:minimize_window"
+                            alternative-text="Minimize"
+                            size="small"
+                            variant="bare"
+                            onclick={toggleChatMinimized}
+                        ></lightning-button-icon>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div class="messages-container">
+                        <template for:each={messages} for:item="msg">
+                            <div key={msg.id} class={msg.cssClass}>
+                                <template if:true={msg.isUser}>
+                                    <div class="user-message-bubble">
+                                        {msg.content}
+                                    </div>
+                                </template>
+                                <template if:false={msg.isUser}>
+                                    <div class="assistant-message-wrapper">
+                                        <div class="assistant-avatar">
+                                            <lightning-icon icon-name="standard:bot" size="x-small"></lightning-icon>
+                                        </div>
+                                        <div class="assistant-message-bubble">
+                                            <c-base-markdown-text
+                                                if:true={msg.isAssistant}
+                                                value={msg.content}
+                                                onmarkdownparsed={handleMarkdownParsed}
+                                            ></c-base-markdown-text>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="chat-input-container">
+                        <div class="chat-input-wrapper">
+                            <input
+                                type="text"
+                                class="chat-input"
+                                placeholder="Type your message..."
+                                readonly
+                            />
+                            <lightning-button-icon
+                                icon-name="utility:send"
+                                alternative-text="Send"
+                                variant="bare"
+                                class="send-button"
+                            ></lightning-button-icon>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typewriter Effect Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 48px 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 18px;
+        }
+
+        .content {
+            padding: 48px 32px;
+        }
+
+        .demo-grid {
+            display: grid;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .demo-card {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .demo-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        .demo-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .demo-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .demo-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .demo-features {
+            list-style: none;
+            padding: 0;
+            margin-top: 16px;
+        }
+
+        .demo-features li {
+            font-size: 13px;
+            color: #555;
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .demo-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .info-section {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .info-section h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .info-section p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .info-section a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .info-section a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            padding: 24px 32px;
+            background: #f5f5f5;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Typewriter Effect Demo</h1>
+            <p>Streaming text animation with live markdown rendering</p>
+        </div>
+
+        <div class="content">
+            <div class="demo-grid">
+                <a href="./streaming-markdown-simple.html" class="demo-card">
+                    <div class="demo-icon">🧁</div>
+                    <div class="demo-title">Streaming Markdown Demo</div>
+                    <div class="demo-description">
+                        Full implementation with TypewriterService + BaseMarkdownText rendering
+                    </div>
+                    <ul class="demo-features">
+                        <li>Character-by-character animation</li>
+                        <li>Live markdown parsing</li>
+                        <li>Inline cursor with blink</li>
+                        <li>Performance metrics</li>
+                        <li>CSS smoothing animations</li>
+                    </ul>
+                </a>
+            </div>
+
+            <div class="info-section">
+                <h2>About This Demo</h2>
+                <p>
+                    This demo showcases a streaming text typewriter effect with live markdown rendering,
+                    extracted from the <strong>ui-copilot-components</strong> codebase.
+                </p>
+                <p>
+                    The implementation uses the exact same flow as the production POC:
+                    TypewriterService animates text character-by-character, which triggers
+                    markdown parsing on each frame for live formatting.
+                </p>
+                <p>
+                    <strong>Key Features:</strong>
+                </p>
+                <ul class="demo-features">
+                    <li>Adaptive animation speed (catches up when queue builds)</li>
+                    <li>GPU-accelerated rendering for smooth performance</li>
+                    <li>Blinking cursor (JavaScript-driven, only during idle)</li>
+                    <li>Real-time performance metrics</li>
+                    <li>Uses exact mock data from codebase</li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <h2>Source Code</h2>
+                <p>
+                    View the source code and documentation on GitHub:
+                    <a href="https://github.com/yourusername/typewriter-demo" target="_blank">
+                        github.com/yourusername/typewriter-demo
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Extracted from <strong>ui-copilot-components</strong> codebase</p>
+        </div>
+    </div>
+</body>
+</html>

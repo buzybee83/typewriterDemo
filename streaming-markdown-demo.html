@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Markdown Chat Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Salesforce Design Tokens */
+            --slds-g-color-neutral-base-10: #181818;
+            --slds-g-color-neutral-base-80: #c9c9c9;
+            --slds-g-color-neutral-base-95: #f3f3f3;
+            --slds-g-font-size-base: 0.8125rem;
+            --slds-g-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --slds-g-font-family-monospace: 'Courier New', Courier, monospace;
+            --slds-g-font-lineheight-base: 1.5;
+            --slds-g-sizing-1: 0.125rem;
+            --slds-g-sizing-2: 0.25rem;
+            --slds-g-sizing-4: 0.5rem;
+            --slds-g-spacing-3: 0.75rem;
+            --slds-g-spacing-4: 1rem;
+            --slds-g-sizing-border-1: 1px;
+            --slds-g-radius-border-1: 0.25rem;
+            --slds-g-radius-border-2: 0.5rem;
+            --slds-g-font-scale-1: 0.75rem;
+            --slds-g-font-scale-3: 0.875rem;
+            --slds-g-font-weight-4: 400;
+            --slds-g-font-weight-5: 500;
+            --slds-g-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: var(--slds-g-font-family);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 800px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .citations-panel {
+            width: 280px;
+            padding: 20px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        /* Markdown Styles inside message bubble */
+        .message-bubble .markdown-wrapper {
+            font-size: var(--slds-g-font-size-base);
+            font-family: var(--slds-g-font-family);
+            line-height: var(--slds-g-font-lineheight-base);
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .message-bubble .markdown-wrapper h1,
+        .message-bubble .markdown-wrapper h2,
+        .message-bubble .markdown-wrapper h3,
+        .message-bubble .markdown-wrapper h4 {
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .message-bubble .markdown-wrapper h1 { font-size: 1.5em; }
+        .message-bubble .markdown-wrapper h2 { font-size: 1.3em; }
+        .message-bubble .markdown-wrapper h3 { font-size: 1.1em; }
+
+        .message-bubble .markdown-wrapper p {
+            margin: 8px 0;
+        }
+
+        .message-bubble .markdown-wrapper ul,
+        .message-bubble .markdown-wrapper ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .message-bubble .markdown-wrapper li {
+            margin: 4px 0;
+        }
+
+        .message-bubble .markdown-wrapper a {
+            text-decoration: none;
+            color: #0176d3;
+            font-weight: 500;
+        }
+
+        .message-bubble .markdown-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        /* Citation links */
+        .message-bubble .markdown-wrapper a[href="#"] {
+            background: #667eea;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .message-bubble .markdown-wrapper a[href="#"]:hover {
+            background: #5568d3;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .message-bubble .markdown-wrapper code {
+            background-color: var(--slds-g-color-neutral-base-95);
+            color: var(--slds-g-color-neutral-base-10);
+            padding: var(--slds-g-sizing-1) var(--slds-g-sizing-2);
+            border-radius: var(--slds-g-radius-border-1);
+            font-family: var(--slds-g-font-family-monospace);
+            font-size: var(--slds-g-font-scale-1);
+            font-weight: var(--slds-g-font-weight-5);
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-neutral-base-80);
+        }
+
+        .message-bubble .markdown-wrapper pre {
+            background-color: var(--slds-g-color-neutral-base-95);
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-neutral-base-80);
+            border-radius: var(--slds-g-radius-border-2);
+            padding: var(--slds-g-spacing-4);
+            margin: var(--slds-g-spacing-3) 0;
+            overflow-x: auto;
+            box-shadow: var(--slds-g-shadow-1);
+        }
+
+        .message-bubble .markdown-wrapper pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-size: var(--slds-g-font-scale-3);
+            font-weight: var(--slds-g-font-weight-4);
+        }
+
+        .message-bubble .markdown-wrapper blockquote {
+            border-left: 3px solid #667eea;
+            padding-left: 12px;
+            margin: 8px 0;
+            color: #666;
+        }
+
+        .message-bubble .markdown-wrapper table {
+            border-collapse: collapse;
+            margin: 8px 0;
+            width: 100%;
+            font-size: 0.9em;
+        }
+
+        .message-bubble .markdown-wrapper table th,
+        .message-bubble .markdown-wrapper table td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        .message-bubble .markdown-wrapper table th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .message-bubble .markdown-wrapper strong {
+            font-weight: 600;
+        }
+
+        /* Cursor is now inline HTML, no CSS needed */
+
+        /* Citation card */
+        .citation-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .citation-card:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+
+        .citation-card.active {
+            background: #e8eaf6;
+            border-color: #667eea;
+        }
+
+        .citation-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 22px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .citation-type {
+            display: inline-block;
+            background: #e0e0e0;
+            color: #666;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .citation-type.record {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .citation-type.link {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .citation-value {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .controls {
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .demo-select {
+            margin-bottom: 12px;
+        }
+
+        .demo-select select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .controls-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-group label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .control-group input {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        button.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        @media (max-width: 900px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .citations-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e0e0e0;
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 Streaming Markdown Chat Demo</h1>
+            <p>Typewriter effect + Markdown rendering + Citations</p>
+        </div>
+
+        <div class="content">
+            <div class="chat-container" id="chatContainer">
+                <!-- Messages will appear here -->
+            </div>
+
+            <div class="citations-panel">
+                <div class="panel-title">Citations</div>
+                <div id="citationsContainer">
+                    <p style="color: #999; font-size: 12px;">Citations will appear during streaming</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="demo-select">
+                <select id="demoSelect">
+                    <option value="citations">Rich Response with Citations</option>
+                    <option value="code">Code Example with Markdown</option>
+                    <option value="table">Tables & Lists</option>
+                    <option value="conversation">Multi-Turn Conversation</option>
+                </select>
+            </div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Speed (chars/frame)</label>
+                    <input type="number" id="speedInput" value="1" min="1" max="10">
+                </div>
+                <div class="control-group">
+                    <label>Frame Delay (ms)</label>
+                    <input type="number" id="delayInput" value="40" min="16" max="100" step="4">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="primary" id="startBtn">Start Streaming</button>
+                <button class="secondary" id="skipBtn" disabled>Skip Animation</button>
+                <button class="danger" id="clearBtn">Clear Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="typewriter.js"></script>
+    <script src="markdown-utils.js"></script>
+    <script src="streaming-markdown.js"></script>
+</body>
+</html>

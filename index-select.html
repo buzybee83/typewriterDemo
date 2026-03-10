@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Demos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 48px 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 18px;
+        }
+
+        .demos {
+            padding: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .demo-card {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .demo-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        .demo-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .demo-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .demo-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .demo-features {
+            list-style: none;
+            padding: 0;
+            margin-top: 16px;
+        }
+
+        .demo-features li {
+            font-size: 13px;
+            color: #555;
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .demo-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .demo-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 12px;
+        }
+
+        .footer {
+            padding: 24px 32px;
+            background: #f5f5f5;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Component Demos</h1>
+            <p>Interactive demonstrations of streaming text components</p>
+        </div>
+
+        <div class="demos">
+            <a href="index.html" class="demo-card">
+                <div class="demo-icon">🚀</div>
+                <div class="demo-title">Typewriter Effect</div>
+                <div class="demo-description">
+                    Demonstrates streaming text animation with character-by-character reveal
+                </div>
+                <ul class="demo-features">
+                    <li>Adaptive animation speed</li>
+                    <li>Blinking cursor indicator</li>
+                    <li>Markdown support</li>
+                    <li>Configurable frame delay</li>
+                    <li>Multiple demo scenarios</li>
+                </ul>
+                <span class="demo-badge">TypewriterService</span>
+            </a>
+
+            <a href="markdown-demo.html" class="demo-card">
+                <div class="demo-icon">📝</div>
+                <div class="demo-title">Markdown Renderer</div>
+                <div class="demo-description">
+                    Showcases markdown rendering with citations, sanitization, and link handling
+                </div>
+                <ul class="demo-features">
+                    <li>Citation markers support</li>
+                    <li>HTML sanitization</li>
+                    <li>Rich markdown features</li>
+                    <li>Link event handling</li>
+                    <li>Code syntax highlighting</li>
+                </ul>
+                <span class="demo-badge">BaseMarkdownText</span>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>
+                Extracted from <strong>ui-copilot-components</strong> codebase<br>
+                <a href="README.md" target="_blank">View Documentation</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
