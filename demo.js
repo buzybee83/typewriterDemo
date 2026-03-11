@@ -145,6 +145,89 @@ const DEMO_CONTENT = {
             "conversation flow."
         ],
         isMarkdown: true
+    },
+    rushDemo: {
+        title: "Rush Mode Demo (Watch Speed Tier!)",
+        chunks: [
+            "# Understanding Rush Mode\n\n",
+            "This demo showcases the **rush mode** feature, which activates when a stream ends ",
+            "but there's still content in the animation queue.\n\n",
+            "## How It Works\n\n",
+            "Instead of abruptly cutting off the animation with `skipToEnd()`, ",
+            "the typewriter smoothly speeds up to finish within a configured time budget (default: 5 seconds).\n\n",
+            "### Watch the Speed Tier Indicator!\n\n",
+            "As this message streams, you'll notice:\n",
+            "1. **NORMAL** (green) - Initial baseline speed\n",
+            "2. Then the stream will end mid-animation...\n",
+            "3. **RUSH** (purple, pulsing) - Smooth acceleration to finish!\n\n",
+            "## Technical Details\n\n",
+            "```javascript\n",
+            "// When stream ends with pending content\n",
+            "if (typewriter.hasPendingContent()) {\n",
+            "    // Instead of: typewriter.skipToEnd();\n",
+            "    typewriter.rushToEnd(5000); // Finish in 5s\n",
+            "}\n",
+            "```\n\n",
+            "### Benefits of Rush Mode\n\n",
+            "- **Smooth finish** - No jarring cuts\n",
+            "- **Predictable timing** - Complete within time budget\n",
+            "- **Better UX** - Users see the full content animate\n",
+            "- **Configurable** - Adjust `rushToEndMs` in settings\n\n",
+            "## Comparison: Skip vs Rush\n\n",
+            "| Method | Behavior | Use Case |\n",
+            "|--------|----------|----------|\n",
+            "| `skipToEnd()` | Instant display | User clicks Skip button |\n",
+            "| `rushToEnd(ms)` | Smooth speedup | Stream ends naturally |\n\n",
+            "### Algorithm\n\n",
+            "Rush mode calculates the optimal chars-per-frame:\n\n",
+            "```javascript\n",
+            "const totalRemaining = queue + currentChunk;\n",
+            "const frames = maxMs / 16; // 60fps\n",
+            "const charsPerFrame = totalRemaining / frames;\n",
+            "```\n\n",
+            "This ensures smooth rendering at 60fps while meeting the time budget.\n\n",
+            "## Adaptive Speed System\n\n",
+            "The typewriter has multiple speed tiers:\n\n",
+            "### Normal Operation\n",
+            "- **NORMAL** - 1 char/frame (baseline)\n",
+            "- **MEDIUM** - 3 chars/frame (queue > 45 chars)\n",
+            "- **HIGH** - 5 chars/frame (queue > 80 chars)\n",
+            "- **CRITICAL** - 10 chars/frame (queue > 120 chars)\n\n",
+            "### Special Modes\n",
+            "- **RUSH** - Variable speed to finish in time budget\n",
+            "- **IDLE** - Paused, waiting for more chunks\n\n",
+            "## Configuration\n\n",
+            "You can tune these settings:\n",
+            "- **Rush to End Duration** - Time budget for smooth finish (1-10s)\n",
+            "- **Queue Thresholds** - When to trigger speed tiers\n",
+            "- **Adaptive Speed Tiers** - How fast each tier runs\n\n",
+            "## Real-World Usage\n\n",
+            "In production, rush mode activates when:\n",
+            "1. API stream completes: `onStreamEnd` fires\n",
+            "2. Animation still has queued content\n",
+            "3. Instead of cutting off, smoothly accelerate\n",
+            "4. Complete within 5 seconds\n",
+            "5. User sees full content without jarring jumps\n\n",
+            "### Code Example\n\n",
+            "```typescript\n",
+            "// In streamObserver/util.ts\n",
+            "export function finalizeStreamingText(host) {\n",
+            "    if (host._typewriterService.hasPendingContent()) {\n",
+            "        // Smooth finish instead of skip\n",
+            "        host._typewriterService.rushToEnd(5000);\n",
+            "        return; // Let it finish naturally\n",
+            "    }\n",
+            "    // No pending content, clean up immediately\n",
+            "    service.skipToEnd();\n",
+            "}\n",
+            "```\n\n",
+            "## Try It Yourself!\n\n",
+            "Watch the **Speed Tier** indicator change from **NORMAL** to **RUSH** (purple, pulsing) ",
+            "as this message finishes. The animation will smoothly accelerate to complete within your ",
+            "configured rush duration!\n\n",
+            "This demonstrates how the typewriter provides a polished, professional streaming experience."
+        ],
+        isMarkdown: true
     }
 };
 
@@ -283,12 +366,18 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs) {
             if (typewriter && typewriter.hasPendingContent()) {
                 typewriter.rushToEnd(rushToEndMs);
             }
-            // Disable skip button after a brief delay (let animation settle)
+            // Disable skip button and reset speed tier after animation completes
             setTimeout(() => {
                 skipBtn.disabled = true;
                 startBtn.disabled = false;
                 statusEl.textContent = 'Ready';
-            }, 1000);
+                // Reset speed tier display when done
+                if (!typewriter || !typewriter.isAnimating()) {
+                    queueSizeEl.textContent = '0';
+                    speedTierEl.textContent = '-';
+                    speedTierEl.className = 'stat-value';
+                }
+            }, rushToEndMs + 500);
             return;
         }
 
@@ -498,6 +587,10 @@ function clearChat() {
         charCount: 0
     };
     updateStats();
+    // Reset speed tier display
+    queueSizeEl.textContent = '0';
+    speedTierEl.textContent = '-';
+    speedTierEl.className = 'stat-value';
     statusEl.textContent = 'Ready';
     startBtn.disabled = false;
     skipBtn.disabled = true;
@@ -518,26 +611,31 @@ window.addEventListener('DOMContentLoaded', () => {
             if (!welcomeShown) {
                 setTimeout(() => {
                     addMessage('assistant',
-                        `Hi! I'm your **Agentforce Service Agent**. This demo showcases streaming text animation with adaptive typewriter effects.
-
-**How to use:**
-- Select a demo scenario from the left panel
-- Click **Start Demo** to see the animation
-- Adjust settings in collapsible sections:
-  - **Type Speed** - Characters per frame
-  - **Adaptive Speed Tiers** - Catch-up speeds
-  - **Queue Thresholds** - When to speed up
-  - **Timing** - Cursor and rush settings
-- Watch the **Speed Tier** indicator change colors as the animation adapts!
-
-**Key Features:**
-- Character-by-character reveal
-- Adaptive speed (catches up automatically)
-- Smart cursor (detects code blocks)
-- Live markdown parsing
-- Rush mode for smooth finishes
-
-Ready to see it in action?`
+                        `<strong>Hi! I'm your Agentforce Service Agent.</strong><br><br>
+                        This demo showcases streaming text animation with adaptive typewriter effects.<br><br>
+                        <strong>How to use:</strong>
+                        <ul>
+                            <li>Select a demo scenario from the left panel</li>
+                            <li>Click <strong>Start Demo</strong> to see the animation</li>
+                            <li>Adjust settings in collapsible sections:
+                                <ul>
+                                    <li><strong>Type Speed</strong> - Characters per frame</li>
+                                    <li><strong>Adaptive Speed Tiers</strong> - Catch-up speeds</li>
+                                    <li><strong>Queue Thresholds</strong> - When to speed up</li>
+                                    <li><strong>Timing</strong> - Cursor and rush settings</li>
+                                </ul>
+                            </li>
+                            <li>Watch the <strong>Speed Tier</strong> indicator change colors!</li>
+                        </ul>
+                        <strong>Key Features:</strong>
+                        <ul>
+                            <li>Character-by-character reveal</li>
+                            <li>Adaptive speed (catches up automatically)</li>
+                            <li>Smart cursor (detects code blocks)</li>
+                            <li>Live markdown parsing</li>
+                            <li>Rush mode for smooth finishes</li>
+                        </ul>
+                        Ready to see it in action?`
                     );
                     welcomeShown = true;
                 }, 300);
