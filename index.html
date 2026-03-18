@@ -494,6 +494,7 @@
             align-items: flex-start;
             gap: 10px;
             max-width: 90%;
+            min-width: 0;
         }
 
         .assistant-avatar {
@@ -516,10 +517,14 @@
             border-radius: 18px;
             border-bottom-left-radius: 4px;
             word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
             font-size: 14px;
             line-height: 1.5;
             flex: 1;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            max-width: 100%;
+            overflow: hidden;
         }
 
         /* Markdown styles */
@@ -566,6 +571,9 @@
             border-radius: 6px;
             overflow-x: auto;
             margin: 10px 0;
+            max-width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .assistant-message-bubble pre code {
@@ -590,6 +598,8 @@
             margin: 10px 0;
             width: 100%;
             font-size: 13px;
+            display: block;
+            overflow-x: auto;
         }
 
         .assistant-message-bubble table th,
@@ -597,6 +607,8 @@
             border: 1px solid #ddd;
             padding: 6px 8px;
             text-align: left;
+            word-wrap: break-word;
+            max-width: 200px;
         }
 
         .assistant-message-bubble table th {
