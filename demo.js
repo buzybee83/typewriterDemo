@@ -358,7 +358,7 @@ function updateStats() {
 }
 
 // Simulate streaming: Send chunks with delays
-function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs) {
+function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDemo = false) {
     let chunkIndex = 0;
 
     function sendNextChunk() {
@@ -389,8 +389,14 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs) {
         typewriter.addChunk(chunk);
         chunkIndex++;
 
-        // Random delay between chunks to simulate real streaming
-        const delay = Math.random() * 400 + 200; // 200-600ms
+        // For rush demo, send chunks very fast after 75% to build up queue
+        let delay;
+        if (isRushDemo && chunkIndex > chunks.length * 0.75) {
+            delay = 50; // Very fast - builds up queue for rush mode demo
+        } else {
+            // Random delay between chunks to simulate real streaming
+            delay = Math.random() * 400 + 200; // 200-600ms
+        }
         setTimeout(sendNextChunk, delay);
     }
 
@@ -556,7 +562,8 @@ function startDemo() {
     statusEl.textContent = 'Streaming...';
 
     // Start simulated streaming
-    simulateStreaming(demo.chunks, currentTypewriter, demo.isMarkdown, rushToEndMs);
+    const isRushDemo = demoKey === 'rushDemo';
+    simulateStreaming(demo.chunks, currentTypewriter, demo.isMarkdown, rushToEndMs, isRushDemo);
 
     // Update stats periodically
     const statsInterval = setInterval(() => {
