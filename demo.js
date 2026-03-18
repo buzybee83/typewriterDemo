@@ -225,7 +225,25 @@ const DEMO_CONTENT = {
             "Watch the **Speed Tier** indicator change from **NORMAL** to **RUSH** (purple, pulsing) ",
             "as this message finishes. The animation will smoothly accelerate to complete within your ",
             "configured rush duration!\n\n",
-            "This demonstrates how the typewriter provides a polished, professional streaming experience."
+            "This demonstrates how the typewriter provides a polished, professional streaming experience.\n\n",
+            "---\n\n",
+            "## Additional Technical Details\n\n",
+            "The rush mode feature is particularly useful in production environments where:\n\n",
+            "- Network latency varies significantly\n",
+            "- API responses come in bursts\n",
+            "- You want guaranteed completion times\n",
+            "- Users expect smooth, predictable animations\n\n",
+            "### Performance Characteristics\n\n",
+            "Rush mode maintains smooth 60fps animation while adaptively adjusting speed. ",
+            "The algorithm ensures that even with variable network conditions, ",
+            "the user experience remains consistent and professional.\n\n",
+            "### Integration Examples\n\n",
+            "Here's how different teams can use rush mode:\n\n",
+            "1. **Customer Service** - Ensure complete responses within SLA timeframes\n",
+            "2. **Sales Tools** - Provide snappy, responsive AI interactions\n",
+            "3. **Documentation** - Generate formatted docs with predictable timing\n",
+            "4. **Code Generation** - Display code smoothly regardless of payload size\n\n",
+            "This extensive content ensures you can see the rush mode acceleration clearly!"
         ],
         isMarkdown: true
     }
@@ -389,10 +407,11 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
         typewriter.addChunk(chunk);
         chunkIndex++;
 
-        // For rush demo, send chunks very fast after 75% to build up queue
+        // For rush demo, send chunks instantly after 60% to build up massive queue
         let delay;
-        if (isRushDemo && chunkIndex > chunks.length * 0.75) {
-            delay = 50; // Very fast - builds up queue for rush mode demo
+        if (isRushDemo && chunkIndex > chunks.length * 0.6) {
+            // Send remaining chunks instantly to create huge backlog for rush mode
+            delay = 0;
         } else {
             // Random delay between chunks to simulate real streaming
             delay = Math.random() * 400 + 200; // 200-600ms
