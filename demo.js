@@ -372,7 +372,7 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
             // Disable skip button and reset speed tier after animation completes
             setTimeout(() => {
                 skipBtn.disabled = true;
-                startBtn.disabled = false;
+                startBtn.disabled = !isChatOpen();
                 statusEl.textContent = 'Ready';
                 // Reset speed tier display when done
                 if (!typewriter || !typewriter.isAnimating()) {
@@ -580,7 +580,7 @@ function skipAnimation() {
     if (currentTypewriter) {
         currentTypewriter.skipToEnd();
         skipBtn.disabled = true;
-        startBtn.disabled = false;
+        startBtn.disabled = !isChatOpen();
         statusEl.textContent = 'Skipped';
     }
 }
@@ -604,7 +604,7 @@ function clearChat() {
     speedTierEl.textContent = '-';
     speedTierEl.className = 'stat-value';
     statusEl.textContent = 'Ready';
-    startBtn.disabled = false;
+    startBtn.disabled = !isChatOpen();
     skipBtn.disabled = true;
 }
 

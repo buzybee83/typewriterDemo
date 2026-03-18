@@ -934,6 +934,12 @@
             icon.classList.toggle('expanded');
         }
 
+        // Global function to check if chat is open
+        function isChatOpen() {
+            const chatWindow = document.getElementById('chatWindow');
+            return chatWindow && chatWindow.classList.contains('open');
+        }
+
         // Open first section by default
         window.addEventListener('DOMContentLoaded', () => {
             toggleSection('typeSpeed');
@@ -942,15 +948,34 @@
             const chatFab = document.getElementById('chatFab');
             const chatWindow = document.getElementById('chatWindow');
             const minimizeBtn = document.getElementById('minimizeBtn');
+            const startBtnMain = document.getElementById('startBtn');
+            const skipBtnMain = document.getElementById('skipBtn');
+            const clearBtnMain = document.getElementById('clearBtn');
+
+            // Function to toggle button states based on chat visibility
+            function updateButtonStates(chatOpen) {
+                const isAnimating = skipBtnMain && !skipBtnMain.disabled;
+                startBtnMain.disabled = !chatOpen || isAnimating;
+                // Skip button state is controlled by animation state
+                if (!chatOpen) {
+                    skipBtnMain.disabled = true;
+                }
+                clearBtnMain.disabled = !chatOpen;
+            }
+
+            // Initialize buttons as disabled (chat starts closed)
+            updateButtonStates(false);
 
             chatFab.addEventListener('click', () => {
                 chatFab.classList.add('hidden');
                 chatWindow.classList.add('open');
+                updateButtonStates(true);
             });
 
             minimizeBtn.addEventListener('click', () => {
                 chatWindow.classList.remove('open');
                 chatFab.classList.remove('hidden');
+                updateButtonStates(false);
             });
 
             // Update range displays
