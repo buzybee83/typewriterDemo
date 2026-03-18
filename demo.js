@@ -250,6 +250,7 @@ const frameCountEl = document.getElementById('frameCount');
 const durationEl = document.getElementById('duration');
 const charCountEl = document.getElementById('charCount');
 const queueSizeEl = document.getElementById('queueSize');
+const charsPerFrameCurrentEl = document.getElementById('charsPerFrameCurrent');
 const speedTierEl = document.getElementById('speedTier');
 const statusEl = document.getElementById('status');
 
@@ -322,6 +323,7 @@ function updateStats() {
     if (currentTypewriter) {
         const queueStats = currentTypewriter.getQueueStats();
         queueSizeEl.textContent = queueStats.totalPending;
+        charsPerFrameCurrentEl.textContent = queueStats.currentSpeed;
 
         // Determine speed tier and apply styling
         speedTierEl.className = 'stat-value'; // Reset classes
@@ -331,6 +333,7 @@ function updateStats() {
             speedTierEl.classList.add('speed-rush');
         } else if (!queueStats.isAnimating) {
             speedTierEl.textContent = 'IDLE';
+            charsPerFrameCurrentEl.textContent = '-';
         } else {
             // Get config to check thresholds
             const queueThresholdCritical = parseInt(document.getElementById('queueThresholdCritical').value);
@@ -374,6 +377,7 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs) {
                 // Reset speed tier display when done
                 if (!typewriter || !typewriter.isAnimating()) {
                     queueSizeEl.textContent = '0';
+                    charsPerFrameCurrentEl.textContent = '-';
                     speedTierEl.textContent = '-';
                     speedTierEl.className = 'stat-value';
                 }
@@ -589,6 +593,7 @@ function clearChat() {
     updateStats();
     // Reset speed tier display
     queueSizeEl.textContent = '0';
+    charsPerFrameCurrentEl.textContent = '-';
     speedTierEl.textContent = '-';
     speedTierEl.className = 'stat-value';
     statusEl.textContent = 'Ready';
