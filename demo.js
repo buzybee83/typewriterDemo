@@ -258,6 +258,25 @@ let stats = {
     charCount: 0
 };
 
+// Screen reader announcer
+let announcerElement = null;
+function announce(message, priority = 'polite') {
+    if (!announcerElement) {
+        announcerElement = document.createElement('div');
+        announcerElement.setAttribute('role', 'status');
+        announcerElement.setAttribute('aria-live', priority);
+        announcerElement.setAttribute('aria-atomic', 'true');
+        announcerElement.className = 'visually-hidden';
+        document.body.appendChild(announcerElement);
+    }
+
+    // Clear then set to ensure announcement
+    announcerElement.textContent = '';
+    setTimeout(() => {
+        announcerElement.textContent = message;
+    }, 100);
+}
+
 // DOM Elements
 const chatContainer = document.getElementById('chatContainer');
 const demoSelect = document.getElementById('demoSelect');
@@ -290,6 +309,8 @@ function parseMarkdown(text) {
 function addMessage(role, initialContent = '') {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
+    messageDiv.setAttribute('role', 'article');
+    messageDiv.setAttribute('aria-label', `${role === 'user' ? 'User' : 'Assistant'} message`);
 
     if (role === 'user') {
         const bubbleDiv = document.createElement('div');
@@ -304,6 +325,7 @@ function addMessage(role, initialContent = '') {
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'assistant-avatar';
         avatarDiv.textContent = '🤖';
+        avatarDiv.setAttribute('aria-hidden', 'true');
 
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = 'assistant-message-bubble';
@@ -383,6 +405,7 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
         if (chunkIndex >= chunks.length) {
             // All chunks sent - let animation finish naturally, cursor will hide after idle timeout
             statusEl.textContent = 'Stream complete';
+            announce('Stream complete, finishing animation');
             // If there's still content pending (queue or current chunk), rush to finish smoothly
             if (typewriter && typewriter.hasPendingContent()) {
                 typewriter.rushToEnd(rushToEndMs);
@@ -579,6 +602,7 @@ function startDemo() {
     startBtn.disabled = true;
     skipBtn.disabled = false;
     statusEl.textContent = 'Streaming...';
+    announce(`Starting ${demo.title} demo`);
 
     // Start simulated streaming
     const isRushDemo = demoKey === 'rushDemo';
@@ -601,6 +625,7 @@ function skipAnimation() {
         skipBtn.disabled = true;
         startBtn.disabled = !isChatOpen();
         statusEl.textContent = 'Skipped';
+        announce('Animation skipped to end');
     }
 }
 
@@ -625,6 +650,7 @@ function clearChat() {
     statusEl.textContent = 'Ready';
     startBtn.disabled = !isChatOpen();
     skipBtn.disabled = true;
+    announce('Chat cleared');
 }
 
 // Initial welcome message - show when chat opens

@@ -18,6 +18,44 @@
             overflow: hidden;
         }
 
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Skip to content link */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            z-index: 10000;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Visually hidden (screen reader only) */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         /* Main Container */
         .demo-container {
             display: flex;
@@ -79,6 +117,11 @@
             background: #f9f9f9;
         }
 
+        .demo-section select:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
         /* Collapsible Section */
         .config-section {
             margin-bottom: 12px;
@@ -96,10 +139,19 @@
             cursor: pointer;
             user-select: none;
             transition: background 0.2s;
+            width: 100%;
+            border: none;
+            text-align: left;
+            font-family: inherit;
         }
 
         .section-header:hover {
             background: #f0f0f0;
+        }
+
+        .section-header:focus {
+            outline: 2px solid #667eea;
+            outline-offset: -2px;
         }
 
         .section-title {
@@ -269,6 +321,11 @@
             transition: all 0.2s;
         }
 
+        .btn:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -335,6 +392,11 @@
         .chat-fab:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .chat-fab:focus {
+            outline: 3px solid white;
+            outline-offset: 2px;
         }
 
         .chat-fab.hidden {
@@ -439,6 +501,11 @@
 
         .icon-btn:hover {
             background: #f5f5f5;
+        }
+
+        .icon-btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
         }
 
         /* Messages Container */
@@ -664,9 +731,10 @@
     </style>
 </head>
 <body>
+    <a href="#chatContainer" class="skip-link">Skip to chat</a>
     <div class="demo-container">
         <!-- Settings Panel -->
-        <div class="settings-panel">
+        <aside class="settings-panel" role="complementary" aria-label="Configuration settings">
             <div class="settings-header">
                 <h1>⚙️ Configuration</h1>
                 <p>Adjust animation and performance settings</p>
@@ -676,7 +744,8 @@
                 <!-- Demo Selection -->
                 <div class="demo-section">
                     <h2>Demo Content</h2>
-                    <select id="demoSelect">
+                    <label for="demoSelect" class="visually-hidden">Select demo content</label>
+                    <select id="demoSelect" aria-label="Select demo content type">
                         <option value="simple">Simple Text</option>
                         <option value="markdown">Rich Markdown</option>
                         <option value="code">Code Example</option>
@@ -688,18 +757,18 @@
 
                 <!-- Type Speed Section -->
                 <div class="config-section">
-                    <div class="section-header" onclick="toggleSection('typeSpeed')">
+                    <button class="section-header" onclick="toggleSection('typeSpeed')" aria-expanded="false" aria-controls="typeSpeed-content" id="typeSpeed-button">
                         <span class="section-title">Type Speed</span>
-                        <span class="section-icon" id="typeSpeed-icon">▼</span>
-                    </div>
-                    <div class="section-content" id="typeSpeed-content">
+                        <span class="section-icon" id="typeSpeed-icon" aria-hidden="true">▼</span>
+                    </button>
+                    <div class="section-content" id="typeSpeed-content" role="region" aria-labelledby="typeSpeed-button">
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="charsPerFrame">Characters Per Frame</label>
-                                <input type="range" id="charsPerFrame" min="1" max="10" value="1" step="1">
+                                <input type="range" id="charsPerFrame" min="1" max="10" value="1" step="1" aria-valuetext="1 character per frame" aria-describedby="charsPerFrame-desc">
                                 <div class="range-display">
-                                    <span class="range-label">Plain text speed</span>
-                                    <span class="range-value" id="charsPerFrameValue">1</span>
+                                    <span class="range-label" id="charsPerFrame-desc">Plain text speed</span>
+                                    <span class="range-value" id="charsPerFrameValue" aria-live="polite">1</span>
                                 </div>
                             </div>
 
@@ -726,11 +795,11 @@
 
                 <!-- Adaptive Speed Section -->
                 <div class="config-section">
-                    <div class="section-header" onclick="toggleSection('adaptiveSpeed')">
+                    <button class="section-header" onclick="toggleSection('adaptiveSpeed')" aria-expanded="false" aria-controls="adaptiveSpeed-content" id="adaptiveSpeed-button">
                         <span class="section-title">Adaptive Speed Tiers</span>
-                        <span class="section-icon" id="adaptiveSpeed-icon">▼</span>
-                    </div>
-                    <div class="section-content" id="adaptiveSpeed-content">
+                        <span class="section-icon" id="adaptiveSpeed-icon" aria-hidden="true">▼</span>
+                    </button>
+                    <div class="section-content" id="adaptiveSpeed-content" role="region" aria-labelledby="adaptiveSpeed-button">
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="charsPerFrameMedium">Medium Tier</label>
@@ -764,11 +833,11 @@
 
                 <!-- Queue Thresholds Section -->
                 <div class="config-section">
-                    <div class="section-header" onclick="toggleSection('thresholds')">
+                    <button class="section-header" onclick="toggleSection('thresholds')" aria-expanded="false" aria-controls="thresholds-content" id="thresholds-button">
                         <span class="section-title">Queue Thresholds</span>
-                        <span class="section-icon" id="thresholds-icon">▼</span>
-                    </div>
-                    <div class="section-content" id="thresholds-content">
+                        <span class="section-icon" id="thresholds-icon" aria-hidden="true">▼</span>
+                    </button>
+                    <div class="section-content" id="thresholds-content" role="region" aria-labelledby="thresholds-button">
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="queueThresholdMedium">Medium Threshold (chars)</label>
@@ -802,11 +871,11 @@
 
                 <!-- Timing Section -->
                 <div class="config-section">
-                    <div class="section-header" onclick="toggleSection('timing')">
+                    <button class="section-header" onclick="toggleSection('timing')" aria-expanded="false" aria-controls="timing-content" id="timing-button">
                         <span class="section-title">Timing</span>
-                        <span class="section-icon" id="timing-icon">▼</span>
-                    </div>
-                    <div class="section-content" id="timing-content">
+                        <span class="section-icon" id="timing-icon" aria-hidden="true">▼</span>
+                    </button>
+                    <div class="section-content" id="timing-content" role="region" aria-labelledby="timing-button">
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="maxAnimationTimeMs">Max Animation Time (ms)</label>
@@ -842,81 +911,82 @@
                 </div>
 
                 <!-- Stats Section -->
-                <div class="stats-section">
+                <div class="stats-section" role="region" aria-label="Animation statistics">
                     <div class="stats-grid-3">
                         <div class="stat-box">
                             <div class="stat-label">Frames</div>
-                            <div class="stat-value" id="frameCount">0</div>
+                            <div class="stat-value" id="frameCount" aria-live="polite">0</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Duration</div>
-                            <div class="stat-value" id="duration">0.0s</div>
+                            <div class="stat-value" id="duration" aria-live="polite">0.0s</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Chars</div>
-                            <div class="stat-value" id="charCount">0</div>
+                            <div class="stat-value" id="charCount" aria-live="polite">0</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Queue</div>
-                            <div class="stat-value" id="queueSize">0</div>
+                            <div class="stat-value" id="queueSize" aria-live="polite">0</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Chars/Frame</div>
-                            <div class="stat-value" id="charsPerFrameCurrent">-</div>
+                            <div class="stat-value" id="charsPerFrameCurrent" aria-live="polite">-</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Speed Tier</div>
-                            <div class="stat-value" id="speedTier">-</div>
+                            <div class="stat-value" id="speedTier" aria-live="polite">-</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Status</div>
-                            <div class="stat-value" id="status">Ready</div>
+                            <div class="stat-value" id="status" aria-live="polite" aria-atomic="true">Ready</div>
                         </div>
                     </div>
 
-                    <div class="action-buttons">
-                        <button class="btn btn-primary" id="startBtn">Start Demo</button>
-                        <button class="btn btn-secondary" id="skipBtn" disabled>Skip</button>
-                        <button class="btn btn-danger" id="clearBtn">Clear Chat</button>
+                    <div class="action-buttons" role="group" aria-label="Demo controls">
+                        <button class="btn btn-primary" id="startBtn" aria-label="Start demo animation">Start Demo</button>
+                        <button class="btn btn-secondary" id="skipBtn" disabled aria-label="Skip to end of animation">Skip</button>
+                        <button class="btn btn-danger" id="clearBtn" aria-label="Clear chat messages">Clear Chat</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
 
         <!-- Chat Area -->
-        <div class="chat-area">
+        <main class="chat-area" role="main">
             <!-- Floating Chat Button -->
-            <button class="chat-fab" id="chatFab">
-                <span class="fab-icon">💬</span>
+            <button class="chat-fab" id="chatFab" aria-label="Open chat window" aria-haspopup="dialog">
+                <span class="fab-icon" aria-hidden="true">💬</span>
                 <span>Open Chat</span>
             </button>
 
             <!-- Chat Window -->
-            <div class="chat-window" id="chatWindow">
+            <div class="chat-window" id="chatWindow" role="dialog" aria-modal="true" aria-labelledby="chatWindowTitle">
                 <div class="chat-header">
                     <div class="chat-header-left">
-                        <div class="chat-avatar">🤖</div>
+                        <div class="chat-avatar" aria-hidden="true">🤖</div>
                         <div class="chat-header-info">
-                            <h2>Agentforce Service Agent</h2>
-                            <p>Agentforce Service Agent joined<br>Just now</p>
+                            <h2 id="chatWindowTitle">Agentforce Service Agent</h2>
+                            <p aria-live="polite">Agentforce Service Agent joined<br>Just now</p>
                         </div>
                     </div>
                     <div class="header-actions">
-                        <button class="icon-btn" title="Menu">⋮</button>
-                        <button class="icon-btn" id="minimizeBtn" title="Minimize">▼</button>
+                        <button class="icon-btn" aria-label="Open menu"><span aria-hidden="true">⋮</span></button>
+                        <button class="icon-btn" id="minimizeBtn" aria-label="Minimize chat window"><span aria-hidden="true">▼</span></button>
                     </div>
                 </div>
 
-                <div class="messages-container" id="chatContainer">
+                <div class="messages-container" id="chatContainer" role="log" aria-live="polite" aria-atomic="false" aria-relevant="additions">
                     <!-- Messages will appear here -->
                 </div>
 
                 <div class="chat-footer">
                     <div class="chat-input-wrapper">
-                        <input type="text" class="chat-input" placeholder="Type your message..." readonly>
-                        <button class="send-btn">↑</button>
+                        <label for="chatInput" class="visually-hidden">Type your message</label>
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Type your message..." readonly aria-label="Message input (read-only for demo)">
+                        <button class="send-btn" aria-label="Send message" disabled><span aria-hidden="true">↑</span></button>
                     </div>
-                    <div class="footer-text">Powered by Agentforce from Salesforce</div>
+                    <div class="footer-text" role="contentinfo">Powered by Agentforce from Salesforce</div>
                 </div>
             </div>
         </div>
@@ -929,9 +999,15 @@
         function toggleSection(sectionId) {
             const content = document.getElementById(sectionId + '-content');
             const icon = document.getElementById(sectionId + '-icon');
+            const button = document.getElementById(sectionId + '-button');
 
-            content.classList.toggle('expanded');
+            const isExpanded = content.classList.toggle('expanded');
             icon.classList.toggle('expanded');
+
+            // Update ARIA state
+            if (button) {
+                button.setAttribute('aria-expanded', isExpanded);
+            }
         }
 
         // Global function to check if chat is open
@@ -951,6 +1027,7 @@
             const startBtnMain = document.getElementById('startBtn');
             const skipBtnMain = document.getElementById('skipBtn');
             const clearBtnMain = document.getElementById('clearBtn');
+            let previouslyFocusedElement = null;
 
             // Function to toggle button states based on chat visibility
             function updateButtonStates(chatOpen) {
@@ -963,19 +1040,64 @@
                 clearBtnMain.disabled = !chatOpen;
             }
 
+            // Focus trap for chat dialog
+            function trapFocus(event) {
+                if (!chatWindow.classList.contains('open')) return;
+
+                const focusableElements = chatWindow.querySelectorAll(
+                    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                );
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (event.key === 'Tab') {
+                    if (event.shiftKey && document.activeElement === firstElement) {
+                        event.preventDefault();
+                        lastElement.focus();
+                    } else if (!event.shiftKey && document.activeElement === lastElement) {
+                        event.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+
             // Initialize buttons as disabled (chat starts closed)
             updateButtonStates(false);
 
-            chatFab.addEventListener('click', () => {
+            // Open chat
+            function openChat() {
+                previouslyFocusedElement = document.activeElement;
                 chatFab.classList.add('hidden');
                 chatWindow.classList.add('open');
                 updateButtonStates(true);
-            });
 
-            minimizeBtn.addEventListener('click', () => {
+                // Focus the minimize button when chat opens
+                setTimeout(() => minimizeBtn.focus(), 100);
+            }
+
+            // Close chat
+            function closeChat() {
                 chatWindow.classList.remove('open');
                 chatFab.classList.remove('hidden');
                 updateButtonStates(false);
+
+                // Restore focus to previously focused element
+                if (previouslyFocusedElement) {
+                    previouslyFocusedElement.focus();
+                }
+            }
+
+            chatFab.addEventListener('click', openChat);
+            minimizeBtn.addEventListener('click', closeChat);
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                // Escape closes chat
+                if (e.key === 'Escape' && chatWindow.classList.contains('open')) {
+                    closeChat();
+                }
+                // Tab trapping in chat dialog
+                trapFocus(e);
             });
 
             // Update range displays
@@ -986,11 +1108,32 @@
                 'maxAnimationTimeMs', 'idleCursorTimeoutMs', 'rushToEndMs'
             ];
 
+            // Mapping of IDs to their units for aria-valuetext
+            const rangeUnits = {
+                'charsPerFrame': 'characters per frame',
+                'charsPerFrameMarkdown': 'characters per frame',
+                'frameDelayMs': 'milliseconds',
+                'charsPerFrameMedium': 'characters per frame',
+                'charsPerFrameHigh': 'characters per frame',
+                'charsPerFrameCatchingUp': 'characters per frame',
+                'queueThresholdMedium': 'characters',
+                'queueThresholdHigh': 'characters',
+                'queueThresholdCritical': 'characters',
+                'maxAnimationTimeMs': 'milliseconds',
+                'idleCursorTimeoutMs': 'milliseconds',
+                'rushToEndMs': 'milliseconds'
+            };
+
             ranges.forEach(id => {
                 const input = document.getElementById(id);
                 const display = document.getElementById(id + 'Value');
                 input.addEventListener('input', () => {
-                    display.textContent = input.value;
+                    const value = input.value;
+                    display.textContent = value;
+
+                    // Update aria-valuetext for screen readers
+                    const unit = rangeUnits[id] || '';
+                    input.setAttribute('aria-valuetext', `${value} ${unit}`);
                 });
             });
         });
