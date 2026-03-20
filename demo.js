@@ -277,6 +277,67 @@ function announce(message, priority = 'polite') {
     }, 100);
 }
 
+// Get selected screen reader strategy
+function getScreenReaderStrategy() {
+    const selected = document.querySelector('input[name="srStrategy"]:checked');
+    return selected ? selected.value : 'complete';
+}
+
+// Configure message container for screen reader based on strategy
+function configureMessageAccessibility(messageElement, phase) {
+    const strategy = getScreenReaderStrategy();
+
+    if (strategy === 'immediate') {
+        // Announce everything as it streams
+        messageElement.setAttribute('aria-live', 'polite');
+        messageElement.removeAttribute('aria-hidden');
+    } else if (strategy === 'progressive' || strategy === 'complete') {
+        // Hide during streaming, reveal at end
+        if (phase === 'streaming') {
+            messageElement.setAttribute('aria-live', 'off');
+            messageElement.setAttribute('aria-hidden', 'true');
+            messageElement.setAttribute('aria-busy', 'true');
+        } else if (phase === 'complete') {
+            messageElement.setAttribute('aria-live', 'polite');
+            messageElement.removeAttribute('aria-hidden');
+            messageElement.removeAttribute('aria-busy');
+        }
+    }
+}
+
+// Track streaming progress for progressive announcements
+let streamingProgress = {
+    totalChunks: 0,
+    currentChunk: 0,
+    announcedMilestones: new Set()
+};
+
+function resetStreamingProgress(totalChunks) {
+    streamingProgress = {
+        totalChunks: totalChunks,
+        currentChunk: 0,
+        announcedMilestones: new Set()
+    };
+}
+
+function updateStreamingProgress() {
+    const strategy = getScreenReaderStrategy();
+    if (strategy !== 'progressive') return;
+
+    streamingProgress.currentChunk++;
+    const percent = (streamingProgress.currentChunk / streamingProgress.totalChunks) * 100;
+
+    // Announce at 25%, 50%, 75% milestones
+    const milestones = [25, 50, 75];
+    for (const milestone of milestones) {
+        if (percent >= milestone && !streamingProgress.announcedMilestones.has(milestone)) {
+            announce(`Response ${milestone}% complete`);
+            streamingProgress.announcedMilestones.add(milestone);
+            break;
+        }
+    }
+}
+
 // DOM Elements
 const chatContainer = document.getElementById('chatContainer');
 const demoSelect = document.getElementById('demoSelect');
@@ -332,6 +393,9 @@ function addMessage(role, initialContent = '') {
         if (initialContent) {
             bubbleDiv.innerHTML = initialContent;
         }
+
+        // Configure accessibility for streaming
+        configureMessageAccessibility(bubbleDiv, 'streaming');
 
         wrapperDiv.appendChild(avatarDiv);
         wrapperDiv.appendChild(bubbleDiv);
@@ -401,11 +465,28 @@ function updateStats() {
 function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDemo = false) {
     let chunkIndex = 0;
 
+    // Initialize progress tracking
+    resetStreamingProgress(chunks.length);
+
     function sendNextChunk() {
         if (chunkIndex >= chunks.length) {
             // All chunks sent - let animation finish naturally, cursor will hide after idle timeout
             statusEl.textContent = 'Stream complete';
-            announce('Stream complete, finishing animation');
+
+            // Configure message as complete for screen readers
+            if (currentMessageElement) {
+                configureMessageAccessibility(currentMessageElement, 'complete');
+            }
+
+            // Announce based on strategy
+            const strategy = getScreenReaderStrategy();
+            if (strategy === 'complete') {
+                announce('Response complete. New message available.');
+            } else if (strategy === 'progressive') {
+                announce('Response complete');
+            }
+            // 'immediate' doesn't need end announcement - already announced everything
+
             // If there's still content pending (queue or current chunk), rush to finish smoothly
             if (typewriter && typewriter.hasPendingContent()) {
                 typewriter.rushToEnd(rushToEndMs);
@@ -429,6 +510,9 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
         const chunk = chunks[chunkIndex];
         typewriter.addChunk(chunk);
         chunkIndex++;
+
+        // Update progress for progressive announcements
+        updateStreamingProgress();
 
         // For rush demo, send chunks instantly after 60% to build up massive queue
         let delay;
@@ -602,7 +686,15 @@ function startDemo() {
     startBtn.disabled = true;
     skipBtn.disabled = false;
     statusEl.textContent = 'Streaming...';
-    announce(`Starting ${demo.title} demo`);
+
+    // Announce start based on strategy
+    const strategy = getScreenReaderStrategy();
+    if (strategy === 'progressive') {
+        announce(`Generating response for ${demo.title}`);
+    } else if (strategy === 'complete') {
+        announce('Generating response');
+    }
+    // 'immediate' doesn't need start announcement - will announce content as it comes
 
     // Start simulated streaming
     const isRushDemo = demoKey === 'rushDemo';
