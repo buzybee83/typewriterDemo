@@ -53,6 +53,9 @@ class TypewriterService {
     /** @type {Object} Configuration */
     _config = {};
 
+    /** @type {number} Last frame timestamp for throttling */
+    _lastFrameTime = 0;
+
     // Default configuration
     static CONFIG = {
         charsPerFrame: 1,
@@ -64,7 +67,7 @@ class TypewriterService {
         queueThresholdHigh: 80,
         queueThresholdCritical: 120,
         maxAnimationTimeMs: 15000,
-        frameDelayMs: 0,  // 0 = requestAnimationFrame (smooth 60fps), >0 = setTimeout
+        frameDelayMs: 35,  // Frame-skipping throttle (0 = every frame at 60fps)
         idleCursorTimeoutMs: 1500,
         rushToEndMs: 5000
     };
@@ -123,14 +126,15 @@ class TypewriterService {
         // Start animating if not already running
         if (!this._animationFrameId) {
             this._startTime = Date.now();
+            this._lastFrameTime = performance.now();
             this._setCursorVisible(true);
             this._animate();
         }
     }
 
     /**
-     * Main animation loop using requestAnimationFrame.
-     * Reveals characters progressively and calls the update callback.
+     * Main animation loop using requestAnimationFrame with frame-skipping for throttling.
+     * Always uses rAF for smooth 60fps, but skips frames to achieve desired delay.
      * @private
      */
     _animate() {
@@ -138,9 +142,24 @@ class TypewriterService {
             return;
         }
 
+        // Always schedule next frame first (for smooth 60fps loop)
+        this._animationFrameId = requestAnimationFrame(() => this._animate());
+
+        // Frame-skipping throttle: only update if enough time has passed
+        const now = performance.now();
+        const { frameDelayMs } = this._config;
+        if (!this._rushMode && frameDelayMs > 0) {
+            const elapsed = now - this._lastFrameTime;
+            if (elapsed < frameDelayMs) {
+                // Not enough time passed - skip this frame
+                return;
+            }
+            this._lastFrameTime = now;
+        }
+
         // Safety timeout - if animation runs too long, skip to end
-        const elapsed = Date.now() - this._startTime;
-        if (elapsed > this._config.maxAnimationTimeMs) {
+        const elapsedTotal = Date.now() - this._startTime;
+        if (elapsedTotal > this._config.maxAnimationTimeMs) {
             console.warn('TypewriterService: Animation exceeded max time, skipping to end');
             this.skipToEnd();
             return;
@@ -152,6 +171,7 @@ class TypewriterService {
                 // Nothing more to animate — pause and wait for next chunk.
                 // Start an idle timer: if no new chunk arrives, hide cursor.
                 this._animationFrameId = null;
+                this._lastFrameTime = 0;
                 this._startIdleTimer();
                 return;
             }
@@ -181,14 +201,6 @@ class TypewriterService {
             }
         } catch (e) {
             console.error('TypewriterService: Error in onUpdate callback', e);
-        }
-
-        // Schedule next frame — rush mode always uses rAF for smooth fast finish
-        const { frameDelayMs } = this._config;
-        if (!this._rushMode && frameDelayMs > 0) {
-            this._animationFrameId = setTimeout(() => this._animate(), frameDelayMs);
-        } else {
-            this._animationFrameId = requestAnimationFrame(() => this._animate());
         }
     }
 
@@ -247,14 +259,10 @@ class TypewriterService {
      */
     _cancelAnimation() {
         if (this._animationFrameId) {
-            const { frameDelayMs } = this._config;
-            if (frameDelayMs > 0) {
-                clearTimeout(this._animationFrameId);
-            } else {
-                cancelAnimationFrame(this._animationFrameId);
-            }
+            cancelAnimationFrame(this._animationFrameId);
             this._animationFrameId = null;
         }
+        this._lastFrameTime = 0;
     }
 
     /**
@@ -427,6 +435,7 @@ class TypewriterService {
         this._charIndex = 0;
         this._displayedText = '';
         this._startTime = 0;
+        this._lastFrameTime = 0;
         this._rushMode = false;
         this._rushCharsPerFrame = 0;
         this._lastSpeedTier = undefined;
