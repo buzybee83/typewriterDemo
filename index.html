@@ -822,11 +822,12 @@
 
                             <div class="setting-group">
                                 <label for="frameDelayMs">Frame Delay (ms)</label>
-                                <input type="range" id="frameDelayMs" min="10" max="100" value="35" step="5">
+                                <input type="range" id="frameDelayMs" min="0" max="100" value="0" step="5">
                                 <div class="range-display">
-                                    <span class="range-label">Time between frames</span>
-                                    <span class="range-value" id="frameDelayMsValue">35</span>
+                                    <span class="range-label">0 = requestAnimationFrame (smooth 60fps), &gt;0 = setTimeout</span>
+                                    <span class="range-value" id="frameDelayMsValue">0</span>
                                 </div>
+                                <div class="help-text">0 recommended for smooth animation</div>
                             </div>
                         </div>
                     </div>
@@ -1204,13 +1205,33 @@
             ranges.forEach(id => {
                 const input = document.getElementById(id);
                 const display = document.getElementById(id + 'Value');
+
+                // Set initial display value (especially for frameDelayMs)
+                if (id === 'frameDelayMs' && input.value === '0') {
+                    display.textContent = '0 (rAF)';
+                }
+
                 input.addEventListener('input', () => {
                     const value = input.value;
-                    display.textContent = value;
+
+                    // Special handling for frameDelayMs
+                    if (id === 'frameDelayMs') {
+                        if (value === '0') {
+                            display.textContent = '0 (rAF)';
+                        } else {
+                            display.textContent = value;
+                        }
+                    } else {
+                        display.textContent = value;
+                    }
 
                     // Update aria-valuetext for screen readers
                     const unit = rangeUnits[id] || '';
-                    input.setAttribute('aria-valuetext', `${value} ${unit}`);
+                    if (id === 'frameDelayMs' && value === '0') {
+                        input.setAttribute('aria-valuetext', '0 milliseconds, using requestAnimationFrame for smooth 60fps');
+                    } else {
+                        input.setAttribute('aria-valuetext', `${value} ${unit}`);
+                    }
                 });
             });
         });

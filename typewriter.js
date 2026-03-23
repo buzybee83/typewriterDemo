@@ -64,7 +64,7 @@ class TypewriterService {
         queueThresholdHigh: 80,
         queueThresholdCritical: 120,
         maxAnimationTimeMs: 15000,
-        frameDelayMs: 35,
+        frameDelayMs: 0,  // 0 = requestAnimationFrame (smooth 60fps), >0 = setTimeout
         idleCursorTimeoutMs: 1500,
         rushToEndMs: 5000
     };
