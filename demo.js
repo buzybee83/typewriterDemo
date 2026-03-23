@@ -520,8 +520,25 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
             // Send remaining chunks instantly to create huge backlog for rush mode
             delay = 0;
         } else {
-            // Random delay between chunks to simulate real streaming
-            delay = Math.random() * 400 + 200; // 200-600ms
+            // Adaptive chunk delivery based on animation speed
+            // Faster settings (low frameDelay, high charsPerFrame) get faster chunk delivery
+            const frameDelay = parseInt(document.getElementById('frameDelayMs').value) || 0;
+            const charsPerFrame = parseInt(document.getElementById('charsPerFrame').value) || 1;
+
+            // Calculate animation rate (chars per second)
+            const frameTime = frameDelay || 16; // 0 = 16ms (rAF)
+            const charsPerSecond = (charsPerFrame / frameTime) * 1000;
+
+            // Adjust chunk delay to keep queue fed
+            // Fast animation (100+ chars/sec) = short delays (50-150ms)
+            // Slow animation (20 chars/sec) = longer delays (200-600ms)
+            if (charsPerSecond > 100) {
+                delay = Math.random() * 100 + 50; // 50-150ms
+            } else if (charsPerSecond > 50) {
+                delay = Math.random() * 150 + 100; // 100-250ms
+            } else {
+                delay = Math.random() * 400 + 200; // 200-600ms (original)
+            }
         }
         setTimeout(sendNextChunk, delay);
     }
