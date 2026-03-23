@@ -65,7 +65,8 @@ class TypewriterService {
         queueThresholdCritical: 120,
         maxAnimationTimeMs: 15000,
         frameDelayMs: 35,
-        idleCursorTimeoutMs: 1500
+        idleCursorTimeoutMs: 1500,
+        rushToEndMs: 5000
     };
 
     /**
@@ -292,9 +293,11 @@ class TypewriterService {
 
     /**
      * Speed up animation to finish within the time budget (keeps animating, just faster).
-     * @param {number} maxMs - Maximum time in ms to finish animation (default: 5000)
+     * @param {number} maxMs - Maximum time in ms to finish animation (uses config.rushToEndMs if not provided)
      */
-    rushToEnd(maxMs = 5000) {
+    rushToEnd(maxMs) {
+        const rushMs = maxMs !== undefined ? maxMs : this._config.rushToEndMs;
+
         if (this._isDestroyed) {
             return;
         }
@@ -312,7 +315,7 @@ class TypewriterService {
         // Calculate chars-per-frame needed to finish within the budget.
         // Use a fixed 16ms frame interval (requestAnimationFrame) for smoothness.
         const rushFrameMs = 16;
-        const frames = Math.floor(maxMs / rushFrameMs);
+        const frames = Math.floor(rushMs / rushFrameMs);
         const charsPerFrame = Math.max(1, Math.ceil(totalRemaining / frames));
 
         // Override the per-frame calculation for the remainder of this animation
