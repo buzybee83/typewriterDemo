@@ -64,7 +64,7 @@
 
         /* Settings Panel - Left Side */
         .settings-panel {
-            width: 450px;
+            width: 600px;
             background: white;
             overflow-y: auto;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
@@ -396,6 +396,145 @@
 
         .btn-danger:hover:not(:disabled) {
             background: #dc2626;
+        }
+
+        /* Chunk Log Section - Right Panel */
+        .chunk-log-section {
+            width: 100%;
+            height: 30%;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            border-right: 1px solid #e0e0e0;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chunk-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chunk-log-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-clear-log {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-clear-log:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-clear-log:focus {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+
+        .chunk-log-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            background: #f9f9f9;
+        }
+
+        .chunk-log-empty {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .chunk-log-entry {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 6px;
+            padding: 8px 10px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+            align-items: center;
+        }
+
+        .chunk-log-entry.chunk-log-last {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .chunk-log-footer {
+            padding: 12px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .chunk-time {
+            color: #666;
+            font-weight: 600;
+            min-width: 60px;
+            flex-shrink: 0;
+        }
+
+        .chunk-size {
+            color: #764ba2;
+            font-weight: 600;
+            min-width: 50px;
+            flex-shrink: 0;
+        }
+
+        .chunk-delay {
+            min-width: 60px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .chunk-delay.delay-fast {
+            color: #28a745;
+        }
+
+        .chunk-delay.delay-medium {
+            color: #ffc107;
+        }
+
+        .chunk-delay.delay-slow {
+            color: #dc3545;
+        }
+
+        .chunk-content {
+            color: #333;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chunk-last-flag {
+            font-size: 14px;
+            margin-left: 8px;
         }
 
         /* Chat Area - Right Side */
@@ -790,7 +929,10 @@
                         <option value="code">Code Example</option>
                         <option value="conversation">Conversation</option>
                         <option value="long">Long Response</option>
-                        <option value="rushDemo">Rush Mode Demo ⚡</option>
+                        <option value="fastBurst">🔥 Fast Burst - API Docs (10-100ms)</option>
+                        <option value="technicalDeep">⚡ Technical Deep Dive - TypeScript (30-200ms)</option>
+                        <option value="codeGeneration">💻 Code Generation - React Component (100-500ms)</option>
+                        <option value="slowStream">🐢 Slow Stream - Natural Pace (500-1000ms)</option>
                     </select>
                 </div>
 
@@ -881,7 +1023,7 @@
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="queueThresholdMedium">Medium Threshold (chars)</label>
-                                <input type="range" id="queueThresholdMedium" min="10" max="100" value="45" step="5">
+                                <input type="range" id="queueThresholdMedium" min="10" max="1000" value="45" step="5">
                                 <div class="range-display">
                                     <span class="range-label">Start speeding up</span>
                                     <span class="range-value" id="queueThresholdMediumValue">45</span>
@@ -890,7 +1032,7 @@
 
                             <div class="setting-group">
                                 <label for="queueThresholdHigh">High Threshold (chars)</label>
-                                <input type="range" id="queueThresholdHigh" min="20" max="200" value="80" step="10">
+                                <input type="range" id="queueThresholdHigh" min="20" max="1000" value="80" step="10">
                                 <div class="range-display">
                                     <span class="range-label">Speed up more</span>
                                     <span class="range-value" id="queueThresholdHighValue">80</span>
@@ -899,7 +1041,7 @@
 
                             <div class="setting-group">
                                 <label for="queueThresholdCritical">Critical Threshold (chars)</label>
-                                <input type="range" id="queueThresholdCritical" min="50" max="300" value="120" step="10">
+                                <input type="range" id="queueThresholdCritical" min="50" max="1000" value="120" step="10">
                                 <div class="range-display">
                                     <span class="range-label">Maximum speed</span>
                                     <span class="range-value" id="queueThresholdCriticalValue">120</span>
@@ -1029,6 +1171,20 @@
             </div>
         </aside>
 
+        <!-- Chunk Arrival Log - Right Panel -->
+        <div class="chunk-log-section">
+            <div class="chunk-log-header">
+                <span class="chunk-log-title">📦 Chunk Arrival Log</span>
+                <button class="btn-clear-log" id="clearLogBtn" title="Clear log" aria-label="Clear chunk log">✕</button>
+            </div>
+            <div class="chunk-log-container" id="chunkLog">
+                <div class="chunk-log-empty">No chunks yet - start a demo to see chunks arrive</div>
+            </div>
+            <div class="chunk-log-footer">
+                <span id="chunkCount">0 chunks received</span>
+            </div>
+        </div>
+
         <!-- Chat Area -->
         <main class="chat-area" role="main">
             <!-- Floating Chat Button -->
@@ -1067,8 +1223,8 @@
                     <div class="footer-text" role="contentinfo">Powered by Agentforce from Salesforce</div>
                 </div>
             </div>
-        </div>
-    </div>
+        </main>
+    </div> <!-- End demo-container -->
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="typewriter.js"></script>
