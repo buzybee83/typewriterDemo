@@ -1263,11 +1263,14 @@ function startDemo() {
             stats.charCount = text.length;
             updateStats();
 
-            // Update message bubble (cursor is already included in text)
+            // Update message bubble (cursor is already included in text as HTML)
+            // Always use innerHTML since cursor marker is HTML, even for plain text
             if (demo.isMarkdown) {
                 currentMessageElement.innerHTML = parseMarkdown(text);
             } else {
-                currentMessageElement.textContent = text;
+                // For plain text, preserve line breaks but allow cursor HTML
+                const textWithBreaks = text.replace(/\n/g, '<br>');
+                currentMessageElement.innerHTML = textWithBreaks;
             }
 
             // Auto-scroll
