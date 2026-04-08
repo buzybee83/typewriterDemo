@@ -1,8 +1,46 @@
+// ── Cursor markers ──────────────────────────────────────────────────
+// Inline HTML marker appended to animated text when `renderCursor` is
+// enabled. Uses fully inline styles so child components need zero
+// cursor awareness. Blink is JS-driven because CSS @keyframes cannot
+// penetrate shadow DOM boundaries.
+
+/** HTML cursor — used in normal markdown (paragraphs, lists, etc.) */
+const CURSOR_MARKER =
+    '<span style="user-select:none;pointer-events:none;font-weight:400;color:black;font-size:1.35em;line-height:0">▏</span>';
+
+/** Plain-text cursor — used inside fenced code blocks where HTML is literal */
+const CURSOR_MARKER_CODE = '▏';
+
+/**
+ * Check if text currently ends inside an unclosed fenced code block.
+ * Counts lines starting with ``` — odd count means we're inside a fence.
+ */
+function isInsideCodeBlock(text) {
+    let inside = false;
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].trimStart().startsWith('```')) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
+function getCursorMarker(text) {
+    return isInsideCodeBlock(text) ? CURSOR_MARKER_CODE : CURSOR_MARKER;
+}
+
 /**
  * TypewriterService - Manages typewriter animation for streaming text content
  *
  * Receives delta chunks (phrases/sentences) and animates them character-by-character.
  * Designed to make streaming feel faster by providing immediate visual feedback.
+ *
+ * Two cursor modes (controlled by `config.renderCursor`):
+ *  1. **renderCursor: true** (default) — the service appends an inline HTML cursor
+ *     marker to the text it passes to onUpdate and manages blink internally.
+ *  2. **renderCursor: false** — the service notifies you via onCursorChange so
+ *     you can render the cursor yourself.
  */
 class TypewriterService {
     /** @type {string[]} Queue of delta chunks waiting to be animated */
@@ -56,7 +94,13 @@ class TypewriterService {
     /** @type {number} Last frame timestamp for throttling */
     _lastFrameTime = 0;
 
-    // Default configuration
+    /** @type {boolean} Cursor blink state (on/off) */
+    _cursorBlinkOn = true;
+
+    /** @type {number|null} Cursor blink interval ID */
+    _blinkIntervalId = null;
+
+    // Default configuration (conservative/natural settings)
     static CONFIG = {
         charsPerFrame: 1,
         charsPerFrameMarkdown: 1,
@@ -67,9 +111,11 @@ class TypewriterService {
         queueThresholdHigh: 80,
         queueThresholdCritical: 120,
         maxAnimationTimeMs: 15000,
-        frameDelayMs: 35,  // Frame-skipping throttle (0 = every frame at 60fps)
+        frameDelayMs: 35,
         idleCursorTimeoutMs: 1500,
-        rushToEndMs: 5000
+        rushToEndMs: 5000,
+        renderCursor: true,
+        cursorBlinkMs: 500
     };
 
     /**
@@ -98,6 +144,9 @@ class TypewriterService {
             return;
         }
         this._cursorVisible = visible;
+        if (!visible) {
+            this._stopBlink();
+        }
         try {
             if (this._onCursorChange) {
                 this._onCursorChange(visible);
@@ -105,6 +154,59 @@ class TypewriterService {
         } catch (e) {
             console.error('TypewriterService: Error in onCursorChange callback', e);
         }
+    }
+
+    /**
+     * Send the current displayed text to the onUpdate callback.
+     * When renderCursor is enabled, appends the inline cursor marker.
+     * @private
+     */
+    _notifyUpdate(context = '') {
+        try {
+            if (this._onUpdate) {
+                let text = this._displayedText;
+                if (
+                    this._config.renderCursor &&
+                    this._cursorVisible &&
+                    this._cursorBlinkOn
+                ) {
+                    text += getCursorMarker(text);
+                }
+                this._onUpdate(text);
+            }
+        } catch (e) {
+            const suffix = context ? ` ${context}` : '';
+            console.error(`TypewriterService: Error in onUpdate callback${suffix}:`, e);
+        }
+    }
+
+    /**
+     * Start cursor blinking (only when renderCursor is enabled).
+     * @private
+     */
+    _startBlink() {
+        if (this._blinkIntervalId || !this._config.renderCursor) {
+            return;
+        }
+        this._cursorBlinkOn = true;
+        this._blinkIntervalId = setInterval(() => {
+            if (this._cursorVisible) {
+                this._cursorBlinkOn = !this._cursorBlinkOn;
+                this._notifyUpdate('during blink');
+            }
+        }, this._config.cursorBlinkMs);
+    }
+
+    /**
+     * Stop cursor blinking.
+     * @private
+     */
+    _stopBlink() {
+        if (this._blinkIntervalId) {
+            clearInterval(this._blinkIntervalId);
+            this._blinkIntervalId = null;
+        }
+        this._cursorBlinkOn = true;
     }
 
     /**
@@ -120,41 +222,41 @@ class TypewriterService {
         const wasAnimating = this._animationFrameId !== null;
         this._queue.push(deltaText);
 
-        // Cancel idle timer — new content arrived
+        // Cancel idle timer and blink — new content arrived
         this._cancelIdleTimer();
+        this._stopBlink();
 
         // Start animating if not already running
         if (!this._animationFrameId) {
             this._startTime = Date.now();
-            this._lastFrameTime = performance.now();
             this._setCursorVisible(true);
             this._animate();
         }
     }
 
     /**
-     * Main animation loop using requestAnimationFrame with frame-skipping for throttling.
-     * Always uses rAF for smooth 60fps, but skips frames to achieve desired delay.
+     * Main animation loop using requestAnimationFrame with optional throttling.
+     * @param {number} rafTimestamp - High-resolution timestamp from requestAnimationFrame
      * @private
      */
-    _animate() {
+    _animate(rafTimestamp) {
         if (this._isDestroyed) {
             return;
         }
 
-        // Always schedule next frame first (for smooth 60fps loop)
-        this._animationFrameId = requestAnimationFrame(() => this._animate());
-
-        // Frame-skipping throttle: only update if enough time has passed
-        const now = performance.now();
+        const useRAF = typeof requestAnimationFrame === 'function';
         const { frameDelayMs } = this._config;
-        if (!this._rushMode && frameDelayMs > 0) {
-            const elapsed = now - this._lastFrameTime;
-            if (elapsed < frameDelayMs) {
-                // Not enough time passed - skip this frame
-                return;
+
+        // Use rAF timestamp for throttling (more reliable than Date.now())
+        if (useRAF && !this._rushMode && frameDelayMs > 0 && rafTimestamp) {
+            if (
+                this._lastFrameTime > 0 &&
+                rafTimestamp - this._lastFrameTime < frameDelayMs
+            ) {
+                this._animationFrameId = requestAnimationFrame((ts) => this._animate(ts));
+                return; // Skip this frame
             }
-            this._lastFrameTime = now;
+            this._lastFrameTime = rafTimestamp;
         }
 
         // Safety timeout - if animation runs too long, skip to end
@@ -172,6 +274,7 @@ class TypewriterService {
                 // Start an idle timer: if no new chunk arrives, hide cursor.
                 this._animationFrameId = null;
                 this._lastFrameTime = 0;
+                this._startBlink();
                 this._startIdleTimer();
                 return;
             }
@@ -195,12 +298,13 @@ class TypewriterService {
         this._displayedText += newChars;
 
         // Notify the component
-        try {
-            if (this._onUpdate) {
-                this._onUpdate(this._displayedText);
-            }
-        } catch (e) {
-            console.error('TypewriterService: Error in onUpdate callback', e);
+        this._notifyUpdate();
+
+        // Schedule next frame
+        if (useRAF) {
+            this._animationFrameId = requestAnimationFrame((ts) => this._animate(ts));
+        } else {
+            this._animationFrameId = setTimeout(() => this._animate(), frameDelayMs);
         }
     }
 
@@ -259,7 +363,11 @@ class TypewriterService {
      */
     _cancelAnimation() {
         if (this._animationFrameId) {
-            cancelAnimationFrame(this._animationFrameId);
+            if (typeof cancelAnimationFrame === 'function') {
+                cancelAnimationFrame(this._animationFrameId);
+            } else {
+                clearTimeout(this._animationFrameId);
+            }
             this._animationFrameId = null;
         }
         this._lastFrameTime = 0;
@@ -276,14 +384,7 @@ class TypewriterService {
             // Still idle (no new chunks arrived) — hide cursor
             if (!this._animationFrameId && this._cursorVisible) {
                 this._setCursorVisible(false);
-                // Send final update without cursor
-                try {
-                    if (this._onUpdate) {
-                        this._onUpdate(this._displayedText);
-                    }
-                } catch (e) {
-                    console.error('TypewriterService: Error in onUpdate callback during idle', e);
-                }
+                this._notifyUpdate('during idle');
             }
         }, this._config.idleCursorTimeoutMs);
     }
@@ -367,13 +468,7 @@ class TypewriterService {
         this._charIndex = 0;
 
         // Final update
-        try {
-            if (this._onUpdate) {
-                this._onUpdate(this._displayedText);
-            }
-        } catch (e) {
-            console.error('TypewriterService: Error in onUpdate callback during skipToEnd', e);
-        }
+        this._notifyUpdate('during skipToEnd');
     }
 
     /**
@@ -429,6 +524,7 @@ class TypewriterService {
     reset() {
         this._cancelAnimation();
         this._cancelIdleTimer();
+        this._stopBlink();
         this._setCursorVisible(false);
         this._queue = [];
         this._currentChunk = '';
@@ -456,6 +552,7 @@ class TypewriterService {
         this._isDestroyed = true;
         this._cancelAnimation();
         this._cancelIdleTimer();
+        this._stopBlink();
         this._setCursorVisible(false);
         this._queue = [];
         this._currentChunk = '';

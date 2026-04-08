@@ -1250,87 +1250,24 @@ function startDemo() {
     // Get rushToEndMs separately for use in simulateStreaming
     const rushToEndMs = parseInt(document.getElementById('rushToEndMs').value);
 
-    // Cursor markers (matching POC implementation)
-    const CURSOR_MARKER = '<span style="user-select:none;pointer-events:none;font-weight:400;color:black;font-size:1.35em;line-height:0">▏</span>';
-    const CURSOR_MARKER_CODE = '▏';
+    // Enable built-in cursor rendering (renderCursor: true)
+    config.renderCursor = true;
+    config.cursorBlinkMs = 500;
 
-    // Check if we're inside a code block
-    function isInsideCodeBlock(text) {
-        let inside = false;
-        const lines = text.split('\n');
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trimStart().startsWith('```')) {
-                inside = !inside;
-            }
-        }
-        return inside;
-    }
-
-    // Get appropriate cursor based on context
-    function getCursor(text) {
-        return isInsideCodeBlock(text) ? CURSOR_MARKER_CODE : CURSOR_MARKER;
-    }
-
-    // Track cursor state
-    let cursorVisible = false;
-    let cursorBlinkOn = true;
-    let blinkInterval = null;
-
-    // Push current text with cursor to display
-    function flushValue() {
-        if (!currentTypewriter) return;
-        const text = currentTypewriter.getDisplayedText();
-        const valueToSet = cursorVisible && cursorBlinkOn
-            ? text + getCursor(text)
-            : text;
-        if (demo.isMarkdown) {
-            currentMessageElement.innerHTML = parseMarkdown(valueToSet);
-        } else {
-            currentMessageElement.textContent = valueToSet;
-        }
-    }
-
-    // Start cursor blinking (only when idle, not during active animation)
-    function startBlink() {
-        if (blinkInterval) return;
-        cursorBlinkOn = true;
-        blinkInterval = setInterval(() => {
-            // Only toggle blink when animation is idle (not actively typing)
-            // During active animation, _animate() drives updates and cursor stays solid
-            if (currentTypewriter && !currentTypewriter.isAnimating()) {
-                cursorBlinkOn = !cursorBlinkOn;
-                flushValue();
-            }
-        }, 500);
-    }
-
-    function stopBlink() {
-        if (blinkInterval) {
-            clearInterval(blinkInterval);
-            blinkInterval = null;
-        }
-        cursorBlinkOn = true;
-    }
-
-    // Create typewriter service with full config
+    // Create typewriter service with simplified config
+    // With renderCursor: true, the service handles cursor rendering internally
     currentTypewriter = new TypewriterService(
         (text) => {
-            // Update callback - called on each frame during active animation
+            // Update callback - text already includes cursor when visible
             stats.frameCount++;
             stats.charCount = text.length;
             updateStats();
 
-            // During active animation, cursor is always solid (cursorBlinkOn stays true)
-            // Append cursor inline to the text value (POC approach)
-            const valueToSet = cursorVisible
-                ? text + getCursor(text)
-                : text;
-
-            // Update message bubble
+            // Update message bubble (cursor is already included in text)
             if (demo.isMarkdown) {
-                currentMessageElement.innerHTML = parseMarkdown(valueToSet);
+                currentMessageElement.innerHTML = parseMarkdown(text);
             } else {
-                currentMessageElement.textContent = valueToSet;
+                currentMessageElement.textContent = text;
             }
 
             // Auto-scroll
@@ -1338,27 +1275,9 @@ function startDemo() {
         },
         {
             isMarkdown: demo.isMarkdown,
-            config: config,
-            onCursorChange: (visible) => {
-                // Cursor visibility callback
-                cursorVisible = visible;
-                if (visible) {
-                    startBlink();
-                } else {
-                    stopBlink();
-                    // Send final update without cursor
-                    flushValue();
-                }
-            }
+            config: config
         }
     );
-
-    // Clean up blink interval on destroy
-    const originalDestroy = currentTypewriter.destroy.bind(currentTypewriter);
-    currentTypewriter.destroy = () => {
-        stopBlink();
-        originalDestroy();
-    };
 
     // Update UI
     startBtn.disabled = true;
