@@ -935,6 +935,17 @@
                     </select>
                 </div>
 
+                <!-- Config Preset Selection -->
+                <div class="demo-section">
+                    <h2>Config Preset</h2>
+                    <label for="configPreset" class="visually-hidden">Select configuration preset</label>
+                    <select id="configPreset" aria-label="Select configuration preset">
+                        <option value="custom">Custom (Manual Settings)</option>
+                        <option value="acc">ACC (Agent Conversation Console)</option>
+                        <option value="cwc">CWC (Chat With Claude)</option>
+                    </select>
+                </div>
+
                 <!-- Type Speed Section -->
                 <div class="config-section">
                     <button class="section-header" onclick="toggleSection('typeSpeed')" aria-expanded="false" aria-controls="typeSpeed-content" id="typeSpeed-button">
@@ -963,10 +974,10 @@
 
                             <div class="setting-group">
                                 <label for="frameDelayMs">Frame Delay (ms)</label>
-                                <input type="range" id="frameDelayMs" min="0" max="100" value="35" step="5">
+                                <input type="range" id="frameDelayMs" min="0" max="100" value="20" step="5">
                                 <div class="range-display">
                                     <span class="range-label">Frame-skipping throttle (0 = every frame)</span>
-                                    <span class="range-value" id="frameDelayMsValue">35</span>
+                                    <span class="range-value" id="frameDelayMsValue">20</span>
                                 </div>
                                 <div class="help-text">Always uses rAF for smooth 60fps, skips frames to throttle</div>
                             </div>
@@ -984,28 +995,28 @@
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="charsPerFrameMedium">Medium Tier</label>
-                                <input type="range" id="charsPerFrameMedium" min="1" max="10" value="3" step="1">
+                                <input type="range" id="charsPerFrameMedium" min="1" max="10" value="5" step="1">
                                 <div class="range-display">
                                     <span class="range-label">When queue > medium threshold</span>
-                                    <span class="range-value" id="charsPerFrameMediumValue">3</span>
+                                    <span class="range-value" id="charsPerFrameMediumValue">5</span>
                                 </div>
                             </div>
 
                             <div class="setting-group">
                                 <label for="charsPerFrameHigh">High Tier</label>
-                                <input type="range" id="charsPerFrameHigh" min="1" max="15" value="5" step="1">
+                                <input type="range" id="charsPerFrameHigh" min="1" max="15" value="8" step="1">
                                 <div class="range-display">
                                     <span class="range-label">When queue > high threshold</span>
-                                    <span class="range-value" id="charsPerFrameHighValue">5</span>
+                                    <span class="range-value" id="charsPerFrameHighValue">8</span>
                                 </div>
                             </div>
 
                             <div class="setting-group">
                                 <label for="charsPerFrameCatchingUp">Critical Tier</label>
-                                <input type="range" id="charsPerFrameCatchingUp" min="1" max="20" value="10" step="1">
+                                <input type="range" id="charsPerFrameCatchingUp" min="1" max="100" value="15" step="1">
                                 <div class="range-display">
                                     <span class="range-label">When queue > critical threshold</span>
-                                    <span class="range-value" id="charsPerFrameCatchingUpValue">10</span>
+                                    <span class="range-value" id="charsPerFrameCatchingUpValue">15</span>
                                 </div>
                             </div>
                         </div>
@@ -1022,10 +1033,10 @@
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="queueThresholdMedium">Medium Threshold (chars)</label>
-                                <input type="range" id="queueThresholdMedium" min="10" max="1000" value="45" step="5">
+                                <input type="range" id="queueThresholdMedium" min="10" max="1000" value="35" step="5">
                                 <div class="range-display">
                                     <span class="range-label">Start speeding up</span>
-                                    <span class="range-value" id="queueThresholdMediumValue">45</span>
+                                    <span class="range-value" id="queueThresholdMediumValue">35</span>
                                 </div>
                             </div>
 
@@ -1040,10 +1051,10 @@
 
                             <div class="setting-group">
                                 <label for="queueThresholdCritical">Critical Threshold (chars)</label>
-                                <input type="range" id="queueThresholdCritical" min="50" max="1000" value="120" step="10">
+                                <input type="range" id="queueThresholdCritical" min="50" max="1000" value="140" step="10">
                                 <div class="range-display">
                                     <span class="range-label">Maximum speed</span>
-                                    <span class="range-value" id="queueThresholdCriticalValue">120</span>
+                                    <span class="range-value" id="queueThresholdCriticalValue">140</span>
                                 </div>
                             </div>
                         </div>
@@ -1060,30 +1071,30 @@
                         <div class="section-body">
                             <div class="setting-group">
                                 <label for="maxAnimationTimeMs">Max Animation Time (ms)</label>
-                                <input type="range" id="maxAnimationTimeMs" min="5000" max="30000" value="15000" step="1000">
+                                <input type="range" id="maxAnimationTimeMs" min="5000" max="30000" value="20000" step="1000">
                                 <div class="range-display">
                                     <span class="range-label">Safety timeout</span>
-                                    <span class="range-value" id="maxAnimationTimeMsValue">15000</span>
+                                    <span class="range-value" id="maxAnimationTimeMsValue">20000</span>
                                 </div>
                                 <div class="help-text">Auto skip if exceeded</div>
                             </div>
 
                             <div class="setting-group">
                                 <label for="idleCursorTimeoutMs">Idle Cursor Timeout (ms)</label>
-                                <input type="range" id="idleCursorTimeoutMs" min="500" max="5000" value="1500" step="100">
+                                <input type="range" id="idleCursorTimeoutMs" min="500" max="5000" value="1000" step="100">
                                 <div class="range-display">
                                     <span class="range-label">Cursor hide delay</span>
-                                    <span class="range-value" id="idleCursorTimeoutMsValue">1500</span>
+                                    <span class="range-value" id="idleCursorTimeoutMsValue">1000</span>
                                 </div>
                                 <div class="help-text">After animation ends</div>
                             </div>
 
                             <div class="setting-group">
                                 <label for="rushToEndMs">Rush to End Duration (ms)</label>
-                                <input type="range" id="rushToEndMs" min="1000" max="10000" value="5000" step="500">
+                                <input type="range" id="rushToEndMs" min="1000" max="10000" value="2000" step="500">
                                 <div class="range-display">
                                     <span class="range-label">Speed up on stream end</span>
-                                    <span class="range-value" id="rushToEndMsValue">5000</span>
+                                    <span class="range-value" id="rushToEndMsValue">2000</span>
                                 </div>
                                 <div class="help-text">Time budget to finish smoothly</div>
                             </div>
@@ -1252,6 +1263,60 @@
         // Open first section by default
         window.addEventListener('DOMContentLoaded', () => {
             toggleSection('typeSpeed');
+
+            // Config preset handler
+            const configPresetSelect = document.getElementById('configPreset');
+            const configPresets = {
+                acc: {
+                    charsPerFrame: 3,
+                    charsPerFrameMarkdown: 3,
+                    charsPerFrameMedium: 5,
+                    charsPerFrameHigh: 8,
+                    charsPerFrameCatchingUp: 15,
+                    queueThresholdMedium: 30,
+                    queueThresholdHigh: 70,
+                    queueThresholdCritical: 120,
+                    frameDelayMs: 15,
+                    idleCursorTimeoutMs: 600,
+                    rushToEndMs: 1500
+                },
+                cwc: {
+                    charsPerFrame: 2,
+                    charsPerFrameMarkdown: 3,
+                    charsPerFrameMedium: 5,
+                    charsPerFrameHigh: 8,
+                    charsPerFrameCatchingUp: 15,
+                    queueThresholdMedium: 30,
+                    queueThresholdHigh: 80,
+                    queueThresholdCritical: 160,
+                    frameDelayMs: 20,
+                    idleCursorTimeoutMs: 600,
+                    rushToEndMs: 1500
+                }
+            };
+
+            function applyConfigPreset(preset) {
+                if (!configPresets[preset]) return;
+
+                const config = configPresets[preset];
+                Object.keys(config).forEach(key => {
+                    const input = document.getElementById(key);
+                    const valueDisplay = document.getElementById(key + 'Value');
+                    if (input && input.type === 'range') {
+                        input.value = config[key];
+                        if (valueDisplay) {
+                            valueDisplay.textContent = config[key];
+                        }
+                    }
+                });
+            }
+
+            configPresetSelect.addEventListener('change', (e) => {
+                const preset = e.target.value;
+                if (preset !== 'custom') {
+                    applyConfigPreset(preset);
+                }
+            });
 
             // Chat window controls
             const chatFab = document.getElementById('chatFab');
