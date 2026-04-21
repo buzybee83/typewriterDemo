@@ -425,6 +425,17 @@ class TypewriterService {
             return;
         }
 
+        // If adaptive speed is disabled, don't rush - let it finish at base speed
+        if (this._config.enableAdaptiveSpeed === false) {
+            console.log('[TypewriterService] rushToEnd called but adaptive speed disabled - continuing at base speed');
+            // Just make sure animation continues if paused
+            if (!this._animationFrameId) {
+                this._cancelIdleTimer();
+                this._animate();
+            }
+            return;
+        }
+
         // Calculate total remaining characters
         const remainingInCurrent = this._currentChunk.length - this._charIndex;
         const queuedChars = this._queue.reduce((sum, c) => sum + c.length, 0);
@@ -446,6 +457,8 @@ class TypewriterService {
 
         // Switch to requestAnimationFrame for smooth rush regardless of current frameDelayMs
         this._rushMode = true;
+
+        console.log('[TypewriterService] Rush mode activated - finishing in', rushMs, 'ms at', charsPerFrame, 'chars/frame');
 
         // If animation was paused (idle), restart it
         if (!this._animationFrameId) {
