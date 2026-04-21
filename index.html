@@ -1408,6 +1408,16 @@
                 // Update visual opacity
                 adaptiveSpeedTiers.style.opacity = enabled ? '1' : '0.5';
                 queueThresholds.style.opacity = enabled ? '1' : '0.5';
+
+                // Update running typewriter instance if it exists
+                if (window.currentTypewriter) {
+                    const baseCharsPerFrame = parseInt(document.getElementById('charsPerFrame').value);
+                    window.currentTypewriter.updateConfig({
+                        charsPerFrameMedium: enabled ? parseInt(document.getElementById('charsPerFrameMedium').value) : baseCharsPerFrame,
+                        charsPerFrameHigh: enabled ? parseInt(document.getElementById('charsPerFrameHigh').value) : baseCharsPerFrame,
+                        charsPerFrameCatchingUp: enabled ? parseInt(document.getElementById('charsPerFrameCatchingUp').value) : baseCharsPerFrame
+                    });
+                }
             }
 
             enableAdaptiveSpeedToggle.addEventListener('change', updateAdaptiveSpeedControls);

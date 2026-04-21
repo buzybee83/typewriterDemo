@@ -1603,7 +1603,7 @@ function startDemo() {
 
     // Create typewriter service with simplified config
     // With renderCursor: true, the service handles cursor rendering internally
-    currentTypewriter = new TypewriterService(
+    currentTypewriter = window.currentTypewriter = new TypewriterService(
         (text) => {
             // Update callback - text already includes cursor when visible
             stats.frameCount++;
