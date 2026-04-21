@@ -701,7 +701,7 @@ const DEMO_CONTENT = {
         isMarkdown: true
     },
     relativityStream: {
-        title: "🔬 Einstein's Relativity - Live SSE Timing",
+        title: "🔬 Einstein's Relativity - Live ACC SSE Timing",
         chunks: [
             { text: 'The ', delay: 6 },
             { text: 'concept ', delay: 6 },
