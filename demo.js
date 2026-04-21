@@ -984,7 +984,7 @@ const DEMO_CONTENT = {
         hasRealTiming: true
     },
     salinasValley: {
-        title: "🎯 Salinas Valley - CWC Stream",
+        title: "🎯 Salinas Valley - Live CWC SSE Timing",
         chunks: [
 { text: 'The Salinas Valley is in Northern California. It is a long narrow swale between two ', delay: 0 },
             { text: 'ranges of mountains, and the Salinas River winds and twists up the center until it ', delay: 241 },
