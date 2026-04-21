@@ -338,6 +338,7 @@ class TypewriterService {
                 : cfg.charsPerFrame;
             if (this._lastSpeedTier !== 'normal') {
                 this._lastSpeedTier = 'normal';
+                console.log('[TypewriterService] Adaptive speed DISABLED - using base speed:', charsPerFrame);
             }
             return charsPerFrame;
         }
@@ -364,6 +365,7 @@ class TypewriterService {
         // Log only on speed tier changes to reduce noise
         if (this._lastSpeedTier !== speedTier) {
             this._lastSpeedTier = speedTier;
+            console.log('[TypewriterService] Speed tier changed to:', speedTier, 'charsPerFrame:', charsPerFrame, 'pending:', totalPending);
         }
 
         return charsPerFrame;

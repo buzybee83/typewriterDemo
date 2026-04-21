@@ -1411,9 +1411,11 @@
 
                 // Update running typewriter instance if it exists
                 if (window.currentTypewriter) {
+                    console.log('[Settings] Updating adaptive speed to:', enabled);
                     window.currentTypewriter.updateConfig({
                         enableAdaptiveSpeed: enabled
                     });
+                    console.log('[Settings] Config after update:', window.currentTypewriter._config.enableAdaptiveSpeed);
                 }
             }
 
