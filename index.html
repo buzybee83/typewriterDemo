@@ -271,6 +271,74 @@
             color: #333;
         }
 
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .toggle-switch input:disabled + .toggle-slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Stats Section */
         .stats-section {
             margin-top: 24px;
@@ -988,20 +1056,21 @@
                 <!-- Adaptive Speed Section -->
                 <div class="config-section">
                     <button class="section-header" onclick="toggleSection('adaptiveSpeed')" aria-expanded="false" aria-controls="adaptiveSpeed-content" id="adaptiveSpeed-button">
-                        <span class="section-title">Adaptive Speed Tiers</span>
+                        <span class="section-title">Adaptive Speed</span>
                         <span class="section-icon" id="adaptiveSpeed-icon" aria-hidden="true">▼</span>
                     </button>
                     <div class="section-content" id="adaptiveSpeed-content" role="region" aria-labelledby="adaptiveSpeed-button">
                         <div class="section-body">
-                            <div class="setting-group">
-                                <label>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Enable Adaptive Speed</span>
+                                <label class="toggle-switch">
                                     <input type="checkbox" id="enableAdaptiveSpeed" checked>
-                                    Enable Adaptive Speed
+                                    <span class="toggle-slider"></span>
                                 </label>
-                                <div class="help-text">When enabled, typing speed increases based on queue depth</div>
                             </div>
+                            <div class="help-text">When enabled, typing speed increases based on queue depth</div>
                         </div>
-                        <div class="section-body">
+                        <div class="section-body" id="adaptiveSpeedTiers">
                             <div class="setting-group">
                                 <label for="charsPerFrameMedium">Medium Tier</label>
                                 <input type="range" id="charsPerFrameMedium" min="1" max="10" value="5" step="1">
@@ -1029,17 +1098,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Queue Thresholds Section -->
-                <div class="config-section">
-                    <button class="section-header" onclick="toggleSection('thresholds')" aria-expanded="false" aria-controls="thresholds-content" id="thresholds-button">
-                        <span class="section-title">Queue Thresholds</span>
-                        <span class="section-icon" id="thresholds-icon" aria-hidden="true">▼</span>
-                    </button>
-                    <div class="section-content" id="thresholds-content" role="region" aria-labelledby="thresholds-button">
-                        <div class="section-body">
+                        <div class="section-body" id="queueThresholds">
+                            <h3 style="font-size: 13px; font-weight: 600; color: #666; margin-bottom: 12px;">Queue Thresholds</h3>
                             <div class="setting-group">
                                 <label for="queueThresholdMedium">Medium Threshold (chars)</label>
                                 <input type="range" id="queueThresholdMedium" min="10" max="1000" value="35" step="5">
@@ -1326,6 +1386,33 @@
                     applyConfigPreset(preset);
                 }
             });
+
+            // Adaptive speed toggle handler
+            const enableAdaptiveSpeedToggle = document.getElementById('enableAdaptiveSpeed');
+            const adaptiveSpeedTiers = document.getElementById('adaptiveSpeedTiers');
+            const queueThresholds = document.getElementById('queueThresholds');
+
+            function updateAdaptiveSpeedControls() {
+                const enabled = enableAdaptiveSpeedToggle.checked;
+
+                // Enable/disable all inputs in these sections
+                const inputs = [
+                    ...adaptiveSpeedTiers.querySelectorAll('input'),
+                    ...queueThresholds.querySelectorAll('input')
+                ];
+
+                inputs.forEach(input => {
+                    input.disabled = !enabled;
+                });
+
+                // Update visual opacity
+                adaptiveSpeedTiers.style.opacity = enabled ? '1' : '0.5';
+                queueThresholds.style.opacity = enabled ? '1' : '0.5';
+            }
+
+            enableAdaptiveSpeedToggle.addEventListener('change', updateAdaptiveSpeedControls);
+            // Initialize on load
+            updateAdaptiveSpeedControls();
 
             // Chat window controls
             const chatFab = document.getElementById('chatFab');
