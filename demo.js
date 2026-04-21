@@ -1576,12 +1576,16 @@ function startDemo() {
     currentMessageElement = addMessage('assistant', '');
 
     // Get all config settings from the settings panel
+    const enableAdaptiveSpeed = document.getElementById('enableAdaptiveSpeed').checked;
+    const baseCharsPerFrame = parseInt(document.getElementById('charsPerFrame').value);
+
     const config = {
-        charsPerFrame: parseInt(document.getElementById('charsPerFrame').value),
+        charsPerFrame: baseCharsPerFrame,
         charsPerFrameMarkdown: parseInt(document.getElementById('charsPerFrameMarkdown').value),
-        charsPerFrameMedium: parseInt(document.getElementById('charsPerFrameMedium').value),
-        charsPerFrameHigh: parseInt(document.getElementById('charsPerFrameHigh').value),
-        charsPerFrameCatchingUp: parseInt(document.getElementById('charsPerFrameCatchingUp').value),
+        // If adaptive speed is disabled, set all tiers to base speed
+        charsPerFrameMedium: enableAdaptiveSpeed ? parseInt(document.getElementById('charsPerFrameMedium').value) : baseCharsPerFrame,
+        charsPerFrameHigh: enableAdaptiveSpeed ? parseInt(document.getElementById('charsPerFrameHigh').value) : baseCharsPerFrame,
+        charsPerFrameCatchingUp: enableAdaptiveSpeed ? parseInt(document.getElementById('charsPerFrameCatchingUp').value) : baseCharsPerFrame,
         queueThresholdMedium: parseInt(document.getElementById('queueThresholdMedium').value),
         queueThresholdHigh: parseInt(document.getElementById('queueThresholdHigh').value),
         queueThresholdCritical: parseInt(document.getElementById('queueThresholdCritical').value),
