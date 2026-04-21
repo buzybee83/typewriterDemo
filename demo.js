@@ -1582,16 +1582,16 @@ function startDemo() {
     const config = {
         charsPerFrame: baseCharsPerFrame,
         charsPerFrameMarkdown: parseInt(document.getElementById('charsPerFrameMarkdown').value),
-        // If adaptive speed is disabled, set all tiers to base speed
-        charsPerFrameMedium: enableAdaptiveSpeed ? parseInt(document.getElementById('charsPerFrameMedium').value) : baseCharsPerFrame,
-        charsPerFrameHigh: enableAdaptiveSpeed ? parseInt(document.getElementById('charsPerFrameHigh').value) : baseCharsPerFrame,
-        charsPerFrameCatchingUp: enableAdaptiveSpeed ? parseInt(document.getElementById('charsPerFrameCatchingUp').value) : baseCharsPerFrame,
+        charsPerFrameMedium: parseInt(document.getElementById('charsPerFrameMedium').value),
+        charsPerFrameHigh: parseInt(document.getElementById('charsPerFrameHigh').value),
+        charsPerFrameCatchingUp: parseInt(document.getElementById('charsPerFrameCatchingUp').value),
         queueThresholdMedium: parseInt(document.getElementById('queueThresholdMedium').value),
         queueThresholdHigh: parseInt(document.getElementById('queueThresholdHigh').value),
         queueThresholdCritical: parseInt(document.getElementById('queueThresholdCritical').value),
         maxAnimationTimeMs: parseInt(document.getElementById('maxAnimationTimeMs').value),
         frameDelayMs: parseInt(document.getElementById('frameDelayMs').value),
-        idleCursorTimeoutMs: parseInt(document.getElementById('idleCursorTimeoutMs').value)
+        idleCursorTimeoutMs: parseInt(document.getElementById('idleCursorTimeoutMs').value),
+        enableAdaptiveSpeed: enableAdaptiveSpeed
     };
 
     // Get rushToEndMs separately for use in simulateStreaming

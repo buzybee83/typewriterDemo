@@ -1411,11 +1411,8 @@
 
                 // Update running typewriter instance if it exists
                 if (window.currentTypewriter) {
-                    const baseCharsPerFrame = parseInt(document.getElementById('charsPerFrame').value);
                     window.currentTypewriter.updateConfig({
-                        charsPerFrameMedium: enabled ? parseInt(document.getElementById('charsPerFrameMedium').value) : baseCharsPerFrame,
-                        charsPerFrameHigh: enabled ? parseInt(document.getElementById('charsPerFrameHigh').value) : baseCharsPerFrame,
-                        charsPerFrameCatchingUp: enabled ? parseInt(document.getElementById('charsPerFrameCatchingUp').value) : baseCharsPerFrame
+                        enableAdaptiveSpeed: enabled
                     });
                 }
             }

@@ -115,7 +115,8 @@ class TypewriterService {
         idleCursorTimeoutMs: 1500,
         rushToEndMs: 5000,
         renderCursor: true,
-        cursorBlinkMs: 500
+        cursorBlinkMs: 500,
+        enableAdaptiveSpeed: true
     };
 
     /**
@@ -329,6 +330,17 @@ class TypewriterService {
         );
         const remainingInCurrent = this._currentChunk.length - this._charIndex;
         const totalPending = queuedChars + remainingInCurrent;
+
+        // If adaptive speed is disabled, always use base speed
+        if (cfg.enableAdaptiveSpeed === false) {
+            const charsPerFrame = this._isMarkdown
+                ? cfg.charsPerFrameMarkdown
+                : cfg.charsPerFrame;
+            if (this._lastSpeedTier !== 'normal') {
+                this._lastSpeedTier = 'normal';
+            }
+            return charsPerFrame;
+        }
 
         // Adaptive speed based on how far behind animation is
         let charsPerFrame;
