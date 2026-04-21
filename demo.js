@@ -1498,7 +1498,7 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
         const isTechnicalDeep = demoKey === 'technicalDeep';
         const isCodeGeneration = demoKey === 'codeGeneration';
         const isSlowDemo = demoKey === 'slowStream';
-        const isRealTiming = demoKey === 'salinasValley';
+        const isRealTiming = DEMO_CONTENT[demoKey]?.hasRealTiming === true;
 
         // For rush demo, send chunks instantly after 60% to build up massive queue
         let delay;
