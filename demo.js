@@ -1460,19 +1460,25 @@ function simulateStreaming(chunks, typewriter, isMarkdown, rushToEndMs, isRushDe
             if (typewriter && typewriter.hasPendingContent()) {
                 typewriter.rushToEnd(rushToEndMs);
             }
-            // Disable skip button and reset speed tier after animation completes
-            setTimeout(() => {
-                skipBtn.disabled = true;
-                startBtn.disabled = !isChatOpen();
-                statusEl.textContent = 'Ready';
-                // Reset speed tier display when done
+
+            // Poll to check when animation actually finishes
+            const checkAnimationComplete = () => {
                 if (!typewriter || !typewriter.isAnimating()) {
+                    // Animation is complete, reset UI
+                    skipBtn.disabled = true;
+                    startBtn.disabled = !isChatOpen();
+                    statusEl.textContent = 'Ready';
                     queueSizeEl.textContent = '0';
                     charsPerFrameCurrentEl.textContent = '-';
                     speedTierEl.textContent = '-';
                     speedTierEl.className = 'stat-value';
+                } else {
+                    // Still animating, check again soon
+                    setTimeout(checkAnimationComplete, 100);
                 }
-            }, rushToEndMs + 500);
+            };
+            // Start checking after a brief delay
+            setTimeout(checkAnimationComplete, 500);
             return;
         }
 
